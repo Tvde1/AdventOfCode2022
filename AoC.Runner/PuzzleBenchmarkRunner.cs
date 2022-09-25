@@ -10,12 +10,14 @@ public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TInput>
 {
     private string _rawInput;
     private TParsed _parsed = default!;
+    private TParsed _parsed2 = default!;
 
     [GlobalSetup]
     public void GetInput()
     {
         _rawInput = TInput.Input;
         _parsed = TPuzzle.Parse(_rawInput);
+        _parsed2 = TPuzzle.Parse(_rawInput);
     }
 
     [Benchmark]
@@ -33,6 +35,6 @@ public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TInput>
     [Benchmark]
     public string Part2()
     {
-        return TPuzzle.Part2(_parsed);
+        return TPuzzle.Part2(_parsed2);
     }
 }

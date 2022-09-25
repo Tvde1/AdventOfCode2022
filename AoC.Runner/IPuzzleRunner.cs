@@ -63,9 +63,10 @@ public class PuzzleRunner : IPuzzleRunner
     {
         var rawInput = TInput.Input;
         var parsed = TPuzzle.Parse(rawInput);
+        var parsed2 = TPuzzle.Parse(rawInput);
 
         var part1 = TPuzzle.Part1(parsed);
-        var part2 = TPuzzle.Part2(parsed);
+        var part2 = TPuzzle.Part2(parsed2);
 
         return new PuzzleResult(puzzle, part1, part2);
     }
