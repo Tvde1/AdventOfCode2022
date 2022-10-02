@@ -1,10 +1,9 @@
 ﻿using AoC.Common;
 using AoC.Common.Models;
-using System.Runtime.CompilerServices;
 
 namespace AoC.Puzzles._2019;
 
-[Puzzle(2019, 3, "First intcode instructions")]
+[Puzzle(2019, 3, "Wires that meet")]
 public class Day03 : IPuzzle<WireOperation[][], Day03Input>
 {
     public static WireOperation[][] Parse(string inputText)
