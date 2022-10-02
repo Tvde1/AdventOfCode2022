@@ -48,7 +48,6 @@ public class Computer
                     }
                 case Opcodes.End:
                     return;
-                    cursor ++;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(opcode), $"Invalid opcode: {opcode}.");
             }

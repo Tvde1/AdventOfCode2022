@@ -8,7 +8,7 @@ public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TInput>
         where TPuzzle : IPuzzle<TParsed, TInput>
         where TInput : IPuzzleInput
 {
-    private string _rawInput;
+    private string? _rawInput;
     private TParsed _parsed = default!;
     private TParsed _parsed2 = default!;
 
@@ -23,7 +23,7 @@ public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TInput>
     [Benchmark]
     public TParsed Parse()
     {
-        return TPuzzle.Parse(_rawInput);
+        return TPuzzle.Parse(_rawInput!);
     }
 
     [Benchmark]

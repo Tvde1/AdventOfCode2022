@@ -26,25 +26,30 @@ public class Day02 : IPuzzle<int[], Day02Input>
 
     public static string Part2(int[] input)
     {
-        for (int verb = 0; verb <= 99; verb++)
-            for (int noun = 0; noun <= 99; noun++)
+        string? result = null;
+        Parallel.For(0, 99, (verb, outerState) =>
+        {
+            Parallel.For(0, 99, (noun, innerState) =>
             {
                 int[] tempmem = (int[])input.Clone();
                 var computer = new Computer(tempmem, noun, verb);
                 try
                 {
                     computer.Execute();
+
+                    if (computer.FirstInteger == 19690720)
+                    {
+                        result = (noun * 100 + verb).ToString();
+                        innerState.Stop();
+                        outerState.Stop();
+                    }
                 }
-                catch { continue; }
+                catch { }
 
-                if (computer.FirstInteger == 19690720)
-                {
-                    return (noun * 100 + verb).ToString();
-                }
-            }
+            });
+        });
 
-
-        return "No pair found.";
+        return result ?? "No pair found.";
     }
 }
 
