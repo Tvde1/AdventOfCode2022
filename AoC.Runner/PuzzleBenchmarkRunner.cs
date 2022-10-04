@@ -4,17 +4,17 @@ using BenchmarkDotNet.Jobs;
 
 namespace AoC.Runner;
 
-[SimpleJob(RuntimeMoniker.Net60)]
+[SimpleJob(RuntimeMoniker.Net60, baseline: true)]
 [SimpleJob(RuntimeMoniker.Net70)]
-[MemoryDiagnoser]
+[HtmlExporter, MarkdownExporter]
+[MemoryDiagnoser(false)]
 public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TPuzzleInputProvider>
         where TPuzzle : IPuzzle<TParsed>, new()
         where TPuzzleInputProvider : IPuzzleInputProvider, new()
 {
-    private TPuzzle _puzzle = default!;
-    private string _rawInput = null!;
-    private TParsed _parsed = default!;
-    private TParsed _parsed2 = default!;
+    private TPuzzle? _puzzle;
+    private string? _rawInput;
+    private TParsed? _parsed;
 
     [GlobalSetup]
     public void GetInput()
@@ -25,24 +25,23 @@ public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TPuzzleInputProvider>
         _puzzle = new TPuzzle();
 
         _parsed = _puzzle.Parse(_rawInput);
-        _parsed2 = _puzzle.Parse(_rawInput);
     }
 
-    [Benchmark]
+    [BenchmarkCategory("Parse"), Benchmark]
     public TParsed Parse()
     {
-        return _puzzle.Parse(_rawInput);
+        return _puzzle!.Parse(_rawInput!);
     }
 
-    [Benchmark]
+    [BenchmarkCategory("Part1"),Benchmark]
     public string Part1()
     {
-        return _puzzle.Part1(_parsed);
+        return _puzzle!.Part1(_parsed!);
     }
 
-    [Benchmark]
+    [BenchmarkCategory("Part2"),Benchmark]
     public string Part2()
     {
-        return _puzzle.Part2(_parsed2);
+        return _puzzle!.Part2(_parsed!);
     }
 }
