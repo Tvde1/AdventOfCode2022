@@ -1,20 +1,18 @@
-﻿using AoC.Common;
-using AoC.Common.Models;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using AoC.Common.Attributes;
+using AoC.Common.Interfaces;
 
-namespace AoC.Puzzles._2019;
+namespace AoC.Puzzles._2019.Puzzles;
 
 [Puzzle(2019, 4, "Secure container number generator")]
-public class Day04 : IPuzzle<(int From, int To), Day04Input>
+public class Day04 : IPuzzle<(int From, int To)>
 {
-    public static (int From, int To) Parse(string inputText)
+    public (int From, int To) Parse(string inputText)
     {
         var s = inputText.Split('-');
         return (int.Parse(s[0]), int.Parse(s[1]));
     }
 
-    public static string Part1((int From, int To) input)
+    public string Part1((int From, int To) input)
     {
         static bool TestNumber(int number)
         {
@@ -52,7 +50,7 @@ public class Day04 : IPuzzle<(int From, int To), Day04Input>
         return count.ToString();
     }
 
-    public static string Part2((int From, int To) input)
+    public string Part2((int From, int To) input)
     {
         static bool TestNumber(int number)
         {
@@ -82,7 +80,7 @@ public class Day04 : IPuzzle<(int From, int To), Day04Input>
         }
 
         var count = 0;
-        var l = Parallel.For(input.From, input.To, (n) =>
+        var l = Parallel.For(input.From, input.To, n =>
         {
             if (TestNumber(n))
             {
@@ -92,9 +90,4 @@ public class Day04 : IPuzzle<(int From, int To), Day04Input>
 
         return count.ToString();
     }
-}
-
-public class Day04Input : IPuzzleInput
-{
-    public static string Input => @"165432-707912";
 }

@@ -1,6 +1,4 @@
-﻿using AoC.Common.Models;
-
-namespace AoC.Common;
+﻿namespace AoC.Common.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
 public class PuzzleAttribute : Attribute

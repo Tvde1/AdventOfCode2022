@@ -1,8 +1,9 @@
-﻿using AoC.Common;
+﻿using AoC.Common.Attributes;
 using AoC.Common.Models;
-using AoC.Puzzles._2019;
+using AoC.Puzzles._2019.Puzzles;
 using BenchmarkDotNet.Running;
 using System.Reflection;
+using AoC.Common.Interfaces;
 
 namespace AoC.Runner;
 
@@ -38,33 +39,55 @@ public class PuzzleRunner : IPuzzleRunner
         method.Invoke(null, null);
     }
 
-    private static void RunBenchmark<TPuzzle, TParsed, TInput>()
-        where TPuzzle : IPuzzle<TParsed, TInput>
-        where TInput : IPuzzleInput
+    private static void RunBenchmark<TPuzzle, TParsed, TPuzzleInputProvider>()
+        where TPuzzle : IPuzzle<TParsed>, new()
+        where TPuzzleInputProvider : IPuzzleInputProvider, new()
     {
-        var summary = BenchmarkRunner.Run<PuzzleBenchmarkRunner<TPuzzle, TParsed, TInput>>();
+        var summary = BenchmarkRunner.Run<PuzzleBenchmarkRunner<TPuzzle, TParsed, TPuzzleInputProvider>>();
         Console.WriteLine(summary.ToString());
     }
 
-    private static PuzzleResult RunPuzzle<TPuzzle, TParsed, TInput>(PuzzleModel puzzle)
-        where TPuzzle : IPuzzle<TParsed, TInput>
-        where TInput : IPuzzleInput
+    private static PuzzleResult RunPuzzle<TPuzzle, TParsed, TPuzzleInputProvider>(PuzzleModel puzzleInfo)
+        where TPuzzle : IPuzzle<TParsed>, new()
+        where TPuzzleInputProvider : IPuzzleInputProvider, new()
     {
-        var rawInput = TInput.Input;
-        var parsed = TPuzzle.Parse(rawInput);
-        var parsed2 = TPuzzle.Parse(rawInput);
+        var inputProvider = new TPuzzleInputProvider();
+        var puzzle = new TPuzzle();
 
-        var part1 = TPuzzle.Part1(parsed);
-        var part2 = TPuzzle.Part2(parsed2);
+        var rawInput = inputProvider.GetRawInput();
 
-        return new PuzzleResult(puzzle, part1, part2);
+        var parsed = puzzle.Parse(rawInput);
+        var parsed2 = puzzle.Parse(rawInput);
+
+        var part1 = puzzle.Part1(parsed);
+        var part2 = puzzle.Part2(parsed2);
+
+        return new PuzzleResult(puzzleInfo, part1, part2);
     }
 
-    private IReadOnlyList<PuzzleModel> GetAllPuzzles()
+    private static Dictionary<(int Year, int Day), Type> GetPuzzleInputProviders()
     {
         var assembly = Assembly.GetAssembly(typeof(Day01));
 
-        var c = assembly.GetTypes()
+        var c = assembly!.GetTypes()
+            .Select(x => new
+            {
+                Type = x,
+                PuzzleAttribute = x.GetCustomAttribute<PuzzleInputAttribute>(),
+            })
+            .Where(x => x.PuzzleAttribute != null);
+
+        return c.ToDictionary(
+            x => (x.PuzzleAttribute!.Year, x.PuzzleAttribute.Day),
+            x => x.Type);
+    }
+
+    private static IReadOnlyList<PuzzleModel> GetAllPuzzles()
+    {
+        var puzzleInputProviders = GetPuzzleInputProviders();
+        var assembly = Assembly.GetAssembly(typeof(Day01));
+
+        var c = assembly!.GetTypes()
             .Select(x => new
             {
                 Type = x,
@@ -73,12 +96,12 @@ public class PuzzleRunner : IPuzzleRunner
             .Where(x => x.PuzzleAttribute != null);
 
         return c.Select(x => new PuzzleModel(
-                x.PuzzleAttribute.Name,
+                x.PuzzleAttribute!.Name,
                 x.PuzzleAttribute.Year,
                 x.PuzzleAttribute.Day,
                 x.Type,
                 x.Type.GetInterfaces()[0].GenericTypeArguments[0],
-                x.Type.GetInterfaces()[0].GenericTypeArguments[1]))
+                puzzleInputProviders[(x.PuzzleAttribute.Year, x.PuzzleAttribute.Day)]))
             .ToList();
     }
 }
