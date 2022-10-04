@@ -1,5 +1,6 @@
 ﻿using AoC.Common.Attributes;
 using AoC.Common.Interfaces;
+using AoC.Puzzles._2019.Shared;
 
 namespace AoC.Puzzles._2019.Puzzles;
 
@@ -14,7 +15,11 @@ public class Day02 : IPuzzle<int[]>
     public string Part1(int[] input)
     {
         int[] tempmem = (int[])input.Clone();
-        var computer = new Computer(tempmem, 12, 2);
+        
+        tempmem[1] = 12;
+        tempmem[2] = 2;
+        
+        var computer = new Computer(tempmem);
 
         computer.Execute();
 
@@ -23,11 +28,15 @@ public class Day02 : IPuzzle<int[]>
 
     public string Part2(int[] input)
     {
-        for (int verb = 0; verb <= 99; verb++)
-            for (int noun = 0; noun <= 99; noun++)
+        for (var verb = 0; verb <= 99; verb++)
+            for (var noun = 0; noun <= 99; noun++)
             {
-                int[] tempmem = (int[])input.Clone();
-                var computer = new Computer(tempmem, noun, verb);
+                var tempmem = (int[])input.Clone();
+
+                tempmem[1] = noun;
+                tempmem[2] = verb;
+                
+                var computer = new Computer(tempmem);
                 try
                 {
                     computer.Execute();

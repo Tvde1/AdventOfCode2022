@@ -92,6 +92,7 @@ class AoCConsole
 
                     var result = _puzzleRunner.RunPuzzle(puzzle);
 
+                    t.Increment(1);
                     t.StopTask();
                     at.Increment(1);
                     ctx.Refresh();
@@ -117,9 +118,9 @@ class AoCConsole
 
     private static IReadOnlyCollection<PuzzleModel> PickPuzzles(IReadOnlyCollection<PuzzleModel> puzzles)
     {
-        var days = puzzles.Select(x => x.Day).Distinct().OrderBy(x => x).ToArray();
+        var days = puzzles.OrderBy(x => x.Day).ToArray();
 
-        var day = days[^1];
+        var day = days[^1].Day;
 
         if (days.Length > 1)
         {
@@ -128,10 +129,10 @@ class AoCConsole
                     .Title("What [green]day[/] do you want to execute?")
                     .PageSize(10)
                     .MoreChoicesText("[grey](Move up and down to reveal more years)[/]")
-                    .AddChoices(days.Select(x => x.ToString()).Prepend("Latest")));
+                    .AddChoices(days.Select(x => $"{x.Day} {x.Name}").Prepend("Latest")));
 
 
-            if (int.TryParse(chosenDay, out var chosenDayInt))
+            if (int.TryParse(chosenDay.Split(' ')[0], out var chosenDayInt))
             {
                 day = chosenDayInt;
             }

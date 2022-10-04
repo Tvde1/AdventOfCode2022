@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
+﻿using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -14,7 +11,7 @@ namespace AoC.SourceGenerators
     [Generator]
     public class PuzzleInputGenerator : IIncrementalGenerator
     {
-        private static DiagnosticDescriptor _noInputDescriptor = new(
+        private static readonly DiagnosticDescriptor _noInputDescriptor = new(
             "AC0001",
             "No input",
             "No input file was found for {0} day {1}",
@@ -45,7 +42,7 @@ namespace AoC.SourceGenerators
         {
             var classDec = context.Node as ClassDeclarationSyntax;
 
-            var attr = classDec.AttributeLists.SelectMany(y => y.Attributes).First(z => z.Name.ToString() == "Puzzle");
+            var attr = classDec.AttributeLists.SelectMany(static y => y.Attributes).First(z => z.Name.ToString() == "Puzzle");
 
             var year = int.Parse(attr.ArgumentList!.Arguments[0].Expression.ToString());
             var day = int.Parse(attr.ArgumentList.Arguments[1].Expression.ToString());
