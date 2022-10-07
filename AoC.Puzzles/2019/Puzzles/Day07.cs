@@ -99,36 +99,28 @@ public class Day07 : IPuzzle<int[]>
                         var ampD = new Computer(memD);
                         var ampE = new Computer(memE);
 
-                        try
+                        ampA.ContinueWithInput(a);
+                        ampB.ContinueWithInput(b);
+                        ampC.ContinueWithInput(c);
+                        ampD.ContinueWithInput(d);
+                        ampE.ContinueWithInput(e);
+
+                        var inA = 0;
+                        while (true)
                         {
-
-                            ampA.ContinueWithInput(a);
-                            ampB.ContinueWithInput(b);
-                            ampC.ContinueWithInput(c);
-                            ampD.ContinueWithInput(d);
-                            ampE.ContinueWithInput(e);
-
-                            var inA = 0;
-                            while (true)
-                            {
-                                var outA = ampA.ContinueWithInput(inA);
-                                var outB = ampB.ContinueWithInput(outA[0].Value);
-                                var outC = ampC.ContinueWithInput(outB[0].Value);
-                                var outD = ampD.ContinueWithInput(outC[0].Value);
-                                var outE = ampE.ContinueWithInput(outD[0].Value);
-                                inA = outE[0].Value!.Value;
-                                if (outE[^1].IsExit) break;
-                            }
-
-                            if (inA > highest)
-                            {
-                                highest = inA;
-                                signal = $"{a}{b}{c}{d}{e}";
-                            }
+                            var outA = ampA.ContinueWithInput(inA);
+                            var outB = ampB.ContinueWithInput(outA[0].Value);
+                            var outC = ampC.ContinueWithInput(outB[0].Value);
+                            var outD = ampD.ContinueWithInput(outC[0].Value);
+                            var outE = ampE.ContinueWithInput(outD[0].Value);
+                            inA = outE[0].Value!.Value;
+                            if (outE[^1].IsExit) break;
                         }
-                        catch
+
+                        if (inA > highest)
                         {
-                            // ignore
+                            highest = inA;
+                            signal = $"{a}{b}{c}{d}{e}";
                         }
                     }
                 }
