@@ -22,9 +22,10 @@ public enum ParameterMode : byte
     Immediate = 1,
 }
 
-public readonly ref struct Computer
+public struct Computer
 {
-    private readonly Span<int> _memory;
+    private readonly int[] _memory;
+    private int _cursor = 0;
 
     public Computer(int[] memory)
     {
@@ -33,33 +34,60 @@ public readonly ref struct Computer
 
     public int FirstInteger => _memory[0];
 
-    public List<int> Execute(ReadOnlySpan<int> inputs = new())
+    public IReadOnlyList<Output> ContinueWithInput(int? input)
     {
-        var outputs = new List<int>();
-        var cursor = 0;
-        var inputCursor = 0;
-
+        var outputs = new List<Output>();
         while (true)
         {
-            var operation = Operation.Parse(_memory[cursor]);
-            cursor++;
+            var operation = Operation.Parse(_memory[_cursor]);
 
-            var output = RunCycle(_memory, inputs, operation, ref cursor, ref inputCursor);
+            if (operation.Opcode == Opcodes.Input && input == null)
+            {
+                return outputs;
+            }
+            
+            _cursor++;
+
+            var output = RunCycleInternal(_memory, operation, ref _cursor, ref input);
+            
             switch (output)
             {
                 case { IsExit: true }:
+                    outputs.Add(output.Value);
                     return outputs;
-                case { } o:
-                    outputs.Add(o.Value);
+                case { Fault: {} f }:
+                    throw new InvalidOperationException(f);
+                case { Value: {} v }:
+                    outputs.Add(output.Value);
                     break;
                 default:
                     continue;
             }
         }
     }
+    
+    public List<int> Execute(ReadOnlySpan<int> inputs = new())
+    {
+        var outputs = new List<int>();
+        var inputCursor = 0;
 
-    private static Output? RunCycle(Span<int> memory, ReadOnlySpan<int> inputs, Operation operation, ref int cursor,
-        ref int inputCursor)
+        while (true)
+        {
+            var res = ContinueWithInput(inputs[inputCursor]);
+            foreach (var r in res)
+            {
+                if (r.IsExit)
+                {
+                    return outputs;
+                }
+                outputs.Add(r.Value!.Value);
+            }
+
+            inputCursor++;
+        }
+    }
+
+    private static Output? RunCycleInternal(Span<int> memory, Operation operation, ref int cursor, ref int? input)
     {
         switch (operation.Opcode)
         {
@@ -70,12 +98,14 @@ public readonly ref struct Computer
                 Operations.Multiply(memory, operation, ref cursor);
                 return null;
             case Opcodes.Input:
-                Debug.Assert(operation.ParameterModes.ToArray().All(x => x == ParameterMode.Position));
-                Operations.Input(memory, ref cursor, inputs[inputCursor++]);
+                if (input == null)
+                    return Output.Faulted("No input provided for input opcode");
+                Operations.Input(memory, ref cursor, input.Value);
+                input = null;
                 return null;
             case Opcodes.Output:
                 var output = Operations.Output(memory, operation, ref cursor);
-                return Output.FromValue(output);
+                return Output.Result(output);
             case Opcodes.JumpIfTrue:
                 Operations.JumpIfTrue(memory, operation, ref cursor);
                 return null;
@@ -220,9 +250,11 @@ public ref struct Operation
     }
 }
 
-public readonly record struct Output(bool IsExit, int Value)
+public readonly record struct Output(bool IsExit, int? Value, string? Fault)
 {
-    public static Output Exit => new(true, default);
+    public static Output Exit => new(true, default, null);
 
-    public static Output FromValue(int value) => new(false, value);
+    public static Output Result(int value) => new(false, value, null);
+
+    public static Output Faulted(string fault) => new(false, null, fault);
 }

@@ -11,7 +11,7 @@ namespace AoC.SourceGenerators
     [Generator]
     public class PuzzleInputGenerator : IIncrementalGenerator
     {
-        private static readonly DiagnosticDescriptor _noInputDescriptor = new(
+        private static readonly DiagnosticDescriptor NoInputDescriptor = new(
             "AC0001",
             "No input",
             "No input file was found for {0} day {1}",
@@ -56,8 +56,6 @@ namespace AoC.SourceGenerators
             var generatorPath = FilePath();
 
             generatorPath = Path.GetDirectoryName(generatorPath);
-            
-            // context.
 
             foreach (var puzzle in enumerations)
             {
@@ -78,7 +76,7 @@ namespace AoC.SourceGenerators
                 catch
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
-                        _noInputDescriptor,
+                        NoInputDescriptor,
                         puzzle.PuzzleClass.Identifier.GetLocation(),
                         puzzle.Year, puzzle.Day));
                 }
