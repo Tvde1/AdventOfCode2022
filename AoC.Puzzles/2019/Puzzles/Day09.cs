@@ -18,7 +18,7 @@ public class Day09 : IPuzzle<long[]>
 
         var output = computer.ContinueWithInput(1);
 
-        return string.Join(string.Empty, output);
+        return string.Join(',', output);
     }
 
     public string Part2(long[] input)

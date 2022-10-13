@@ -49,11 +49,11 @@ class AoCConsole
             return;
         }
 
-        int year = PickYear(puzzles, years);
+        (var year, puzzles) = PickYear(puzzles, years);
 
         _console.MarkupLineInterpolated($"Running year [red]{year}[/].");
         
-        IReadOnlyCollection<PuzzleModel> puzzlesToRun = PickPuzzles(puzzles);
+        var puzzlesToRun = PickPuzzles(puzzles);
 
         var doBenchmark = _console.Confirm("Do you want to benchmark?", false);
 
@@ -105,12 +105,11 @@ class AoCConsole
             });
 
         var tbl = new Table();
-        tbl.AddColumns("No", "Day", "Name", "Part 1", "Part 2");
+        tbl.AddColumns("Day", "Name", "Part 1", "Part 2");
 
-        int i = 0;
         foreach (var result in results)
         {
-            tbl.AddRow(i.ToString(), result.Puzzle.Day.ToString(), result.Puzzle.Name, result.Part1, result.Part2);
+            tbl.AddRow(result.Puzzle.Day.ToString(), result.Puzzle.Name, result.Part1, result.Part2);
         }
 
         _console.Write(tbl);
@@ -141,7 +140,7 @@ class AoCConsole
         return puzzles.Where(x => x.Day == day).ToList();
     }
 
-    private static int PickYear(IReadOnlyCollection<PuzzleModel> puzzles, int[] years)
+    private static (int, IReadOnlyCollection<PuzzleModel>) PickYear(IReadOnlyCollection<PuzzleModel> puzzles, int[] years)
     {
         var year = years[^1];
 
@@ -162,7 +161,6 @@ class AoCConsole
             }
         }
 
-        var remainingPuzzles = puzzles.Where(x => x.Year == year).ToArray();
-        return year;
+        return (year, puzzles.Where(x => x.Year == year).ToArray());
     }
 }

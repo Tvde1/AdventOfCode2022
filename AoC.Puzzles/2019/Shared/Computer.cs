@@ -127,13 +127,13 @@ public struct Computer
         }
     }
 
-    private long GetParameter(ParameterMode parameterMode)
+    private long GetParameterCursor(ParameterMode parameterMode)
     {
         var param = parameterMode switch
         {
-            ParameterMode.Position => _memory[_memory[_cursor]],
-            ParameterMode.Immediate => _memory[_cursor],
-            ParameterMode.Relative => _memory[_memory[_cursor] + _relativeOffset],
+            ParameterMode.Position => _memory[_cursor],
+            ParameterMode.Immediate => _cursor,
+            ParameterMode.Relative => _memory[_cursor] + _relativeOffset,
             _ => throw new ArgumentOutOfRangeException(nameof(parameterMode), parameterMode, "Not a valid ParameterMode")
         };
         _cursor++;
@@ -142,79 +142,79 @@ public struct Computer
 
     private void Add(Operation operation)
     {
-        var a = GetParameter(operation.ParameterModes[0]);
-        var b = GetParameter(operation.ParameterModes[1]);
-        var c = GetParameter(operation.ParameterModes[2]);
+        var a = GetParameterCursor(operation.ParameterModes[0]);
+        var b = GetParameterCursor(operation.ParameterModes[1]);
+        var c = GetParameterCursor(operation.ParameterModes[2]);
 
-        _memory[c] = a + b;
+        _memory[c] = _memory[a] + _memory[b];
     }
 
     private void Multiply(Operation operation)
     {
-        var a = GetParameter(operation.ParameterModes[0]);
-        var b = GetParameter(operation.ParameterModes[1]);
-        var c = GetParameter(operation.ParameterModes[2]);
+        var a = GetParameterCursor(operation.ParameterModes[0]);
+        var b = GetParameterCursor(operation.ParameterModes[1]);
+        var c = GetParameterCursor(operation.ParameterModes[2]);
 
-        _memory[c] = a * b;
+        _memory[c] = _memory[a] * _memory[b];
     }
 
     private void Input(Operation operation, long input)
     {
-        var a = GetParameter(operation.ParameterModes[0]);
+        var a = GetParameterCursor(operation.ParameterModes[0]);
         _memory[a] = input;
     }
 
     private long Output(Operation operation)
     {
-        var a = GetParameter(operation.ParameterModes[0]);
-        return a;
+        var a = GetParameterCursor(operation.ParameterModes[0]);
+        return _memory[a];
     }
 
     private void JumpIfTrue(Operation operation)
     {
-        var a = GetParameter(operation.ParameterModes[0]);
-        var b = GetParameter(operation.ParameterModes[1]);
+        var a = GetParameterCursor(operation.ParameterModes[0]);
+        var b = GetParameterCursor(operation.ParameterModes[1]);
 
-        if (a != 0)
+        if (_memory[a] != 0)
         {
-            _cursor = b;
+            _cursor = _memory[b];
         }
     }
 
     private void JumpIfFalse(Operation operation)
     {
-        var a = GetParameter(operation.ParameterModes[0]);
-        var b = GetParameter(operation.ParameterModes[1]);
+        var a = GetParameterCursor(operation.ParameterModes[0]);
+        var b = GetParameterCursor(operation.ParameterModes[1]);
 
-        if (a == 0)
+        if (_memory[a] == 0)
         {
-            _cursor = b;
+            _cursor = _memory[b];
         }
     }
 
     private void LessThan(Operation operation)
     {
-        var a = GetParameter(operation.ParameterModes[0]);
-        var b = GetParameter(operation.ParameterModes[1]);
-        var c = GetParameter(operation.ParameterModes[2]);
+        var a = GetParameterCursor(operation.ParameterModes[0]);
+        var b = GetParameterCursor(operation.ParameterModes[1]);
+        var c = GetParameterCursor(operation.ParameterModes[2]);
 
-        _memory[c] = a < b ? 1 : 0;
+        _memory[c] = _memory[a] < _memory[b] ? 1 : 0;
     }
 
     private void Equals(Operation operation)
     {
-        var a = GetParameter(operation.ParameterModes[0]);
-        var b = GetParameter(operation.ParameterModes[1]);
-        var c = GetParameter(operation.ParameterModes[2]);
+        var a = GetParameterCursor(operation.ParameterModes[0]);
+        var b = GetParameterCursor(operation.ParameterModes[1]);
+        var c = GetParameterCursor(operation.ParameterModes[2]);
 
-        _memory[c] = a == b ? 1 : 0;
+        _memory[c] = _memory[a] == _memory[b] ? 1 : 0;
     }
     
     private void AdjustRelativeOffset(Operation operation)
     {
-        var a = GetParameter(operation.ParameterModes[0]);
+        var a = GetParameterCursor(operation.ParameterModes[0]);
 
-        _relativeOffset += a;
+        _relativeOffset += _memory[a];
     }
 }
 
