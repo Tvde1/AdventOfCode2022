@@ -17,7 +17,7 @@ public class Day05 : IPuzzle<int[]>
         int[] tempmem = (int[])input.Clone();
         var computer = new Computer(tempmem);
 
-        var numbers = computer.Execute(new[] { 1 });
+        var numbers = computer.Execute(new long[] { 1 });
 
         return string.Join(string.Empty, numbers);
     }
@@ -27,7 +27,7 @@ public class Day05 : IPuzzle<int[]>
         int[] tempmem = (int[])input.Clone();
         var computer = new Computer(tempmem);
 
-        var numbers = computer.Execute(new[] { 5 });
+        var numbers = computer.Execute(new long[] { 5 });
 
         return string.Join(string.Empty, numbers);
     }

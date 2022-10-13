@@ -1,42 +1,40 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace AoC.Puzzles._2019.Shared;
-
-public enum Opcodes : byte
-{
-    Addition = 1,
-    Multiplication = 2,
-    Input = 3,
-    Output = 4,
-    JumpIfTrue = 5,
-    JumpIfFalse = 6,
-    LessThan = 7,
-    Equals = 8,
-    End = 99
-}
 
 public enum ParameterMode : byte
 {
     Position = 0,
     Immediate = 1,
+    Relative = 2,
 }
 
 public struct Computer
 {
-    private readonly int[] _memory;
-    private int _cursor = 0;
+    private readonly Memory _memory;
+    private long _cursor = 0;
+    private long _relativeOffset = 0;
 
+    public Computer(long[] memory)
+    {
+        _memory = new(memory);
+    }
+    
     public Computer(int[] memory)
     {
-        _memory = memory;
+        var m = new long[memory.Length];
+        memory.CopyTo(m, 0);
+
+        _memory = new(m);
     }
 
-    public int FirstInteger => _memory[0];
+    public int FirstInteger => (int) _memory[0];
 
-    public IReadOnlyList<Output> ContinueWithInput(int? input)
+    public List<Out> ContinueWithInput(long? input)
     {
-        var outputs = new List<Output>();
+        var outputs = new List<Out>();
         while (true)
         {
             var operation = Operation.Parse(_memory[_cursor]);
@@ -45,19 +43,19 @@ public struct Computer
             {
                 return outputs;
             }
-            
+
             _cursor++;
 
-            var output = RunCycleInternal(_memory, operation, ref _cursor, ref input);
-            
+            var output = RunCycleInternal(operation, ref input);
+
             switch (output)
             {
                 case { IsExit: true }:
                     outputs.Add(output.Value);
                     return outputs;
-                case { Fault: {} f }:
+                case { Fault: { } f }:
                     throw new InvalidOperationException(f);
-                case { Value: {} v }:
+                case { Value: { } v }:
                     outputs.Add(output.Value);
                     break;
                 default:
@@ -65,21 +63,22 @@ public struct Computer
             }
         }
     }
-    
-    public List<int> Execute(ReadOnlySpan<int> inputs = new())
+
+    public List<long> Execute(ReadOnlySpan<long> inputs = new())
     {
-        var outputs = new List<int>();
+        var outputs = new List<long>();
         var inputCursor = 0;
 
         while (true)
         {
             var res = ContinueWithInput(inputs[inputCursor]);
-            foreach (var r in res)
+            foreach (var r in CollectionsMarshal.AsSpan(res))
             {
                 if (r.IsExit)
                 {
                     return outputs;
                 }
+
                 outputs.Add(r.Value!.Value);
             }
 
@@ -87,174 +86,150 @@ public struct Computer
         }
     }
 
-    private static Output? RunCycleInternal(Span<int> memory, Operation operation, ref int cursor, ref int? input)
+    private Out? RunCycleInternal(Operation operation, ref long? input)
     {
         switch (operation.Opcode)
         {
             case Opcodes.Addition:
-                Operations.Add(memory, operation, ref cursor);
+                Add(operation);
                 return null;
             case Opcodes.Multiplication:
-                Operations.Multiply(memory, operation, ref cursor);
+                Multiply(operation);
                 return null;
             case Opcodes.Input:
                 if (input == null)
-                    return Output.Faulted("No input provided for input opcode");
-                Operations.Input(memory, ref cursor, input.Value);
+                    return Out.Faulted("No input provided for input opcode");
+                Input(operation, input.Value);
                 input = null;
                 return null;
             case Opcodes.Output:
-                var output = Operations.Output(memory, operation, ref cursor);
-                return Output.Result(output);
+                var output = Output(operation);
+                return Out.Result(output);
             case Opcodes.JumpIfTrue:
-                Operations.JumpIfTrue(memory, operation, ref cursor);
+                JumpIfTrue(operation);
                 return null;
             case Opcodes.JumpIfFalse:
-                Operations.JumpIfFalse(memory, operation, ref cursor);
+                JumpIfFalse(operation);
                 return null;
             case Opcodes.LessThan:
-                Operations.LessThan(memory, operation, ref cursor);
+                LessThan(operation);
                 return null;
             case Opcodes.Equals:
-                Operations.Equals(memory, operation, ref cursor);
+                Equals(operation);
+                return null;
+            case Opcodes.AdjustRelativeOffset:
+                AdjustRelativeOffset(operation);
                 return null;
             case Opcodes.End:
-                return Output.Exit;
+                return Out.Exit;
             default:
-                throw new ArgumentOutOfRangeException(nameof(operation.Opcode), $"Invalid opcode: {operation.Opcode}.");
+                throw new ArgumentOutOfRangeException(nameof(operation), $"Invalid opcode: {operation.Opcode}.");
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int GetParameter(Span<int> memory, ParameterMode parameterMode, ref int cursor)
+    private long GetParameter(ParameterMode parameterMode)
     {
         var param = parameterMode switch
         {
-            ParameterMode.Position => memory[memory[cursor]],
-            ParameterMode.Immediate => memory[cursor],
-            _ => throw new ArgumentOutOfRangeException()
+            ParameterMode.Position => _memory[_memory[_cursor]],
+            ParameterMode.Immediate => _memory[_cursor],
+            ParameterMode.Relative => _memory[_memory[_cursor] + _relativeOffset],
+            _ => throw new ArgumentOutOfRangeException(nameof(parameterMode), parameterMode, "Not a valid ParameterMode")
         };
-        cursor++;
+        _cursor++;
         return param;
     }
 
-    private static class Operations
+    private void Add(Operation operation)
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Add(Span<int> memory, Operation operation, ref int cursor)
+        var a = GetParameter(operation.ParameterModes[0]);
+        var b = GetParameter(operation.ParameterModes[1]);
+        var c = GetParameter(operation.ParameterModes[2]);
+
+        _memory[c] = a + b;
+    }
+
+    private void Multiply(Operation operation)
+    {
+        var a = GetParameter(operation.ParameterModes[0]);
+        var b = GetParameter(operation.ParameterModes[1]);
+        var c = GetParameter(operation.ParameterModes[2]);
+
+        _memory[c] = a * b;
+    }
+
+    private void Input(Operation operation, long input)
+    {
+        var a = GetParameter(operation.ParameterModes[0]);
+        _memory[a] = input;
+    }
+
+    private long Output(Operation operation)
+    {
+        var a = GetParameter(operation.ParameterModes[0]);
+        return a;
+    }
+
+    private void JumpIfTrue(Operation operation)
+    {
+        var a = GetParameter(operation.ParameterModes[0]);
+        var b = GetParameter(operation.ParameterModes[1]);
+
+        if (a != 0)
         {
-            var a = GetParameter(memory, operation.ParameterModes[0], ref cursor);
-            var b = GetParameter(memory, operation.ParameterModes[1], ref cursor);
-            var c = memory[cursor++];
-
-            memory[c] = a + b;
+            _cursor = b;
         }
+    }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Multiply(Span<int> memory, Operation operation, ref int cursor)
+    private void JumpIfFalse(Operation operation)
+    {
+        var a = GetParameter(operation.ParameterModes[0]);
+        var b = GetParameter(operation.ParameterModes[1]);
+
+        if (a == 0)
         {
-            var a = GetParameter(memory, operation.ParameterModes[0], ref cursor);
-            var b = GetParameter(memory, operation.ParameterModes[1], ref cursor);
-            var c = memory[cursor++];
-
-            memory[c] = a * b;
+            _cursor = b;
         }
+    }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Input(Span<int> memory, ref int cursor, int input)
-        {
-            var a = memory[cursor++];
-            memory[a] = input;
-        }
+    private void LessThan(Operation operation)
+    {
+        var a = GetParameter(operation.ParameterModes[0]);
+        var b = GetParameter(operation.ParameterModes[1]);
+        var c = GetParameter(operation.ParameterModes[2]);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Output(Span<int> memory, Operation operation, ref int cursor)
-        {
-            var a = GetParameter(memory, operation.ParameterModes[0], ref cursor);
-            return a;
-        }
+        _memory[c] = a < b ? 1 : 0;
+    }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void JumpIfTrue(Span<int> memory, Operation operation, ref int cursor)
-        {
-            var a = GetParameter(memory, operation.ParameterModes[0], ref cursor);
-            var b = GetParameter(memory, operation.ParameterModes[1], ref cursor);
+    private void Equals(Operation operation)
+    {
+        var a = GetParameter(operation.ParameterModes[0]);
+        var b = GetParameter(operation.ParameterModes[1]);
+        var c = GetParameter(operation.ParameterModes[2]);
 
-            if (a != 0)
-            {
-                cursor = b;
-            }
-        }
+        _memory[c] = a == b ? 1 : 0;
+    }
+    
+    private void AdjustRelativeOffset(Operation operation)
+    {
+        var a = GetParameter(operation.ParameterModes[0]);
 
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void JumpIfFalse(Span<int> memory, Operation operation, ref int cursor)
-        {
-            var a = GetParameter(memory, operation.ParameterModes[0], ref cursor);
-            var b = GetParameter(memory, operation.ParameterModes[1], ref cursor);
-
-            if (a == 0)
-            {
-                cursor = b;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LessThan(Span<int> memory, Operation operation, ref int cursor)
-        {
-            var a = GetParameter(memory, operation.ParameterModes[0], ref cursor);
-            var b = GetParameter(memory, operation.ParameterModes[1], ref cursor);
-            var c = memory[cursor++];
-
-            memory[c] = a < b ? 1 : 0;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Equals(Span<int> memory, Operation operation, ref int cursor)
-        {
-            var a = GetParameter(memory, operation.ParameterModes[0], ref cursor);
-            var b = GetParameter(memory, operation.ParameterModes[1], ref cursor);
-            var c = memory[cursor++];
-
-            memory[c] = a == b ? 1 : 0;
-        }
+        _relativeOffset += a;
     }
 }
 
-public ref struct Operation
+public readonly record struct Out(bool IsExit, long? Value, string? Fault)
 {
-    public Opcodes Opcode { get; }
-    public Span<ParameterMode> ParameterModes { get; }
+    public static Out Exit => new(true, default, null);
 
-    private Operation(Opcodes opcode, Span<ParameterMode> parameterModes)
+    public static Out Result(long value) => new(false, value, null);
+
+    public static Out Faulted(string fault) => new(false, null, fault);
+
+    public override string ToString()
     {
-        Opcode = opcode;
-        ParameterModes = parameterModes;
+        return IsExit ? "EXIT"
+            : Value != null ? Value.Value.ToString()
+            : Fault!;
     }
-
-    public static Operation Parse(int input)
-    {
-        var opcode = (Opcodes)(input % 100);
-
-        const int parameterModeCount = 4;
-        Span<ParameterMode> parameterModes = new ParameterMode[parameterModeCount];
-
-        input /= 10;
-        for (var i = 0; i < parameterModeCount; i++)
-        {
-            input /= 10;
-            parameterModes[i] = (ParameterMode)(input & 1);
-        }
-
-        return new Operation(opcode, parameterModes);
-    }
-}
-
-public readonly record struct Output(bool IsExit, int? Value, string? Fault)
-{
-    public static Output Exit => new(true, default, null);
-
-    public static Output Result(int value) => new(false, value, null);
-
-    public static Output Faulted(string fault) => new(false, null, fault);
 }

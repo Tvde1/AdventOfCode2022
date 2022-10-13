@@ -14,7 +14,7 @@ public class Day02 : IPuzzle<int[]>
 
     public string Part1(int[] input)
     {
-        int[] tempmem = (int[])input.Clone();
+        var tempmem = (int[])input.Clone();
         
         tempmem[1] = 12;
         tempmem[2] = 2;

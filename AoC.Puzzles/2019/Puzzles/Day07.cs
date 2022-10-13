@@ -17,7 +17,7 @@ public class Day07 : IPuzzle<int[]>
         var range = Enumerable.Range(0, 5).ToArray();
         const int count = 4 + 3 + 2 + 1 + 0;
 
-        var highest = int.MinValue;
+        var highest = long.MinValue;
         var signal = string.Empty;
 
         foreach (var a in range)
@@ -45,11 +45,11 @@ public class Day07 : IPuzzle<int[]>
                         var ampD = new Computer(memD);
                         var ampE = new Computer(memE);
 
-                        var outA = ampA.Execute(new[] { a, 0 });
-                        var outB = ampB.Execute(new[] { b, outA[0] });
-                        var outC = ampC.Execute(new[] { c, outB[0] });
-                        var outD = ampD.Execute(new[] { d, outC[0] });
-                        var outE = ampE.Execute(new[] { e, outD[0] });
+                        var outA = ampA.Execute(new long[] { a, 0 });
+                        var outB = ampB.Execute(new [] { b, outA[0] });
+                        var outC = ampC.Execute(new [] { c, outB[0] });
+                        var outD = ampD.Execute(new [] { d, outC[0] });
+                        var outE = ampE.Execute(new [] { e, outD[0] });
 
                         var num = outE[0];
 
@@ -71,7 +71,7 @@ public class Day07 : IPuzzle<int[]>
         var range = Enumerable.Range(5, 5).ToArray();
         const int count = 5 + 6 + 7 + 8 + 9;
 
-        var highest = int.MinValue;
+        var highest = long.MinValue;
         var signal = string.Empty;
 
         foreach (var a in range)
@@ -105,7 +105,7 @@ public class Day07 : IPuzzle<int[]>
                         ampD.ContinueWithInput(d);
                         ampE.ContinueWithInput(e);
 
-                        var inA = 0;
+                        long inA = 0;
                         while (true)
                         {
                             var outA = ampA.ContinueWithInput(inA);
