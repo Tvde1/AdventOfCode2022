@@ -1,4 +1,5 @@
-﻿using AoC.Common.Attributes;
+﻿using System.Diagnostics;
+using AoC.Common.Attributes;
 using AoC.Common.Interfaces;
 using AoC.Puzzles._2019.Shared;
 
@@ -23,6 +24,9 @@ public class Day09 : IPuzzle<long[]>
 
     public string Part2(long[] input)
     {
-        return "Not implemented";
+        var computer = new Computer(input);
+
+        var output = computer.ContinueWithInput(2);
+        return string.Join(',', output);
     }
 }
