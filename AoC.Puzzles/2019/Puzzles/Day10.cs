@@ -1,13 +1,11 @@
 ﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Text;
 using AoC.Common.Attributes;
 using AoC.Common.Interfaces;
-using AoC.Puzzles._2019.Shared;
 
 namespace AoC.Puzzles._2019.Puzzles;
 
-[Puzzle(2019, 10, "Astroid radar")]
+[Puzzle(2019, 10, "Asteroid radar")]
 public class Day10 : IPuzzle<bool[,]>
 {
     public bool[,] Parse(string inputText)
@@ -56,7 +54,7 @@ public class Day10 : IPuzzle<bool[,]>
                     if (x.θ < Math.PI / 4)
                     {
                         return Math.PI + x.θ;
-                    };
+                    }
                     
                     return x.θ;
                 });
@@ -93,7 +91,7 @@ public class Day10 : IPuzzle<bool[,]>
 
                 var location = (x, y);
                 var amountVisible = GetPolarCoordinates(input, location)
-                    .DistinctBy(x => x.θ)
+                    .DistinctBy(a => a.θ)
                     .Count();
                 if (amountVisible > mostVisibleCount)
                 {
@@ -135,7 +133,7 @@ public class Day10 : IPuzzle<bool[,]>
         return on;
     }
 
-    public static string ToString(bool[,] input)
+    private static string ToString(bool[,] input)
     {
         var sb = new StringBuilder();
         for (var y = 0; y < input.GetLength(0); y++)
