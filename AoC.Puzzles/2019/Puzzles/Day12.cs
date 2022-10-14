@@ -49,38 +49,9 @@ public class Day12 : IPuzzle<Moon[]>
         var zRythm = GetRepetitionTime(input[0].Position.Z, input[1].Position.Z, input[2].Position.Z,
             input[3].Position.Z);
 
-        var resMaybe = xRythm * yRythm * zRythm;
-
-        var x = xRythm;
-        var y = yRythm;
-        var z = zRythm;
-
-        while (true)
-        {
-            if (x == y && y == z)
-            {
-                break;
-            }
-
-            if (x <= y && x <= z)
-            {
-                x += xRythm;
-            }
-            else if (y <= x && y <= z)
-            {
-                y += yRythm;
-            }
-            else if (z <= x && z <= y)
-            {
-                z += zRythm;
-            }
-            else
-            {
-                throw new Exception("wut");
-            }
-        }
-
-        return x.ToString();
+        var lcm = MyLeastCommonMultipleLol(MyLeastCommonMultipleLol(xRythm, yRythm), zRythm);
+        
+        return lcm.ToString();
     }
 
     private static long GetRepetitionTime(int a, int b, int c, int d)
@@ -114,6 +85,28 @@ public class Day12 : IPuzzle<Moon[]>
                 && a == originalA && b == originalB && c == originalC && d == originalD)
             {
                 return i;
+            }
+        }
+    }
+
+    private static long MyLeastCommonMultipleLol(long a, long b)
+    {
+        var workA = a;
+        var workB = b;
+
+        while (true)
+        {
+            if (workA < workB)
+            {
+                workA += a;
+            }
+            else if (workB < workA)
+            {
+                workB += b;
+            }
+            else
+            {
+                return workA;
             }
         }
     }
