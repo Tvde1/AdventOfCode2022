@@ -16,9 +16,7 @@ public ref struct Operation
     public static Operation Parse(long input)
     {
         var opcode = (Opcodes)(input % 100);
-#if DEBUG
-        var oldIn = input;
-#endif
+
         const int parameterModeCount = 4;
         var parameterModes = new ParameterMode[parameterModeCount];
 
@@ -30,14 +28,7 @@ public ref struct Operation
         }
         
         var parsed = new Operation(opcode, parameterModes);
-        
-#if DEBUG
-        var parsedToString = parsed.ToString();
-        if (oldIn.ToString() != parsedToString)
-        {
-            Debugger.Break();
-        }
-#endif
+
         return parsed;
     }
 
