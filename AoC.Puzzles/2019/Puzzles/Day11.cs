@@ -52,16 +52,16 @@ public class Day11 : IPuzzle<long[]>
                 ? 1
                 : 0;
 
-            var output = computer.ContinueWithInput(currentTileIsWhite);
+            var isExited = computer.ContinueWithInput(currentTileIsWhite, out var output);
 
-            canvas[(currentX, currentY)] = output[0].Value == 1;
+            canvas[(currentX, currentY)] = output[0] == 1;
 
-            if (output.Count > 2 && output[2].IsExit)
+            if (isExited)
             {
                 break;
             }
 
-            direction = Calculate(direction, output[1].Value == 0);
+            direction = Calculate(direction, output[1] == 0);
 
             switch (direction)
             {

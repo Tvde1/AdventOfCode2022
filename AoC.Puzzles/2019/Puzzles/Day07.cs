@@ -99,22 +99,22 @@ public class Day07 : IPuzzle<int[]>
                         var ampD = new Computer(memD);
                         var ampE = new Computer(memE);
 
-                        ampA.ContinueWithInput(a);
-                        ampB.ContinueWithInput(b);
-                        ampC.ContinueWithInput(c);
-                        ampD.ContinueWithInput(d);
-                        ampE.ContinueWithInput(e);
+                        ampA.ContinueWithInput(a, out _);
+                        ampB.ContinueWithInput(b, out _);
+                        ampC.ContinueWithInput(c, out _);
+                        ampD.ContinueWithInput(d, out _);
+                        ampE.ContinueWithInput(e, out _);
 
                         long inA = 0;
                         while (true)
                         {
-                            var outA = ampA.ContinueWithInput(inA);
-                            var outB = ampB.ContinueWithInput(outA[0].Value);
-                            var outC = ampC.ContinueWithInput(outB[0].Value);
-                            var outD = ampD.ContinueWithInput(outC[0].Value);
-                            var outE = ampE.ContinueWithInput(outD[0].Value);
-                            inA = outE[0].Value!.Value;
-                            if (outE[^1].IsExit) break;
+                            ampA.ContinueWithInput(inA, out var outA);
+                            ampB.ContinueWithInput(outA[0], out var outB);
+                            ampC.ContinueWithInput(outB[0], out var outC);
+                            ampD.ContinueWithInput(outC[0], out var outD);
+                            var isExited = ampE.ContinueWithInput(outD[0], out var outE);
+                            inA = outE[0];
+                            if (isExited) break;
                         }
 
                         if (inA > highest)

@@ -1,47 +1,36 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿namespace AoC.Puzzles._2019.Shared;
 
-namespace AoC.Puzzles._2019.Shared;
-
-public enum ParameterMode : byte
-{
-    Position = 0,
-    Immediate = 1,
-    Relative = 2,
-}
-
-public struct Computer
+public class Computer
 {
     private readonly Memory _memory;
-    private long _cursor = 0;
-    private long _relativeOffset = 0;
+    private long _cursor;
+    private long _relativeOffset;
 
     public Computer(long[] memory)
     {
-        _memory = new(memory);
+        _memory = new Memory(memory);
     }
-    
+
     public Computer(int[] memory)
     {
         var m = new long[memory.Length];
         memory.CopyTo(m, 0);
 
-        _memory = new(m);
+        _memory = new Memory(m);
     }
 
-    public int FirstInteger => (int) _memory[0];
+    public int FirstInteger => (int)_memory[0];
 
-    public List<Out> ContinueWithInput(long? input)
+    public bool ContinueWithInput(long? input, out List<long> outputs)
     {
-        var outputs = new List<Out>();
+        outputs = new List<long>();
         while (true)
         {
             var operation = Operation.Parse(_memory[_cursor]);
 
             if (operation.Opcode == Opcodes.Input && input == null)
             {
-                return outputs;
+                return false;
             }
 
             _cursor++;
@@ -50,13 +39,12 @@ public struct Computer
 
             switch (output)
             {
-                case { IsExit: true }:
-                    outputs.Add(output.Value);
-                    return outputs;
-                case { Fault: { } f }:
+                case { IsExit: true, }:
+                    return true;
+                case { Fault: { } f, }:
                     throw new InvalidOperationException(f);
-                case { Value: { } v }:
-                    outputs.Add(output.Value);
+                case { Value: { } v, }:
+                    outputs.Add(v);
                     break;
                 default:
                     continue;
@@ -71,19 +59,18 @@ public struct Computer
 
         while (true)
         {
-            var res = ContinueWithInput(inputs[inputCursor]);
-            foreach (var r in CollectionsMarshal.AsSpan(res))
-            {
-                if (r.IsExit)
-                {
-                    return outputs;
-                }
+            var hasFinished = ContinueWithInput(inputs[inputCursor], out var currOutputs);
+            outputs.AddRange(currOutputs);
 
-                outputs.Add(r.Value!.Value);
+            if (hasFinished)
+            {
+                break;
             }
 
             inputCursor++;
         }
+
+        return outputs;
     }
 
     private Out? RunCycleInternal(Operation operation, ref long? input)
@@ -134,7 +121,8 @@ public struct Computer
             ParameterMode.Position => _memory[_cursor],
             ParameterMode.Immediate => _cursor,
             ParameterMode.Relative => _memory[_cursor] + _relativeOffset,
-            _ => throw new ArgumentOutOfRangeException(nameof(parameterMode), parameterMode, "Not a valid ParameterMode")
+            _ => throw new ArgumentOutOfRangeException(nameof(parameterMode), parameterMode,
+                "Not a valid ParameterMode")
         };
         _cursor++;
         return param;
@@ -209,7 +197,7 @@ public struct Computer
 
         _memory[c] = _memory[a] == _memory[b] ? 1 : 0;
     }
-    
+
     private void AdjustRelativeOffset(Operation operation)
     {
         var a = GetParameterCursor(operation.ParameterModes[0]);

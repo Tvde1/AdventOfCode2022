@@ -17,16 +17,16 @@ public class Day09 : IPuzzle<long[]>
     {
         var computer = new Computer(input);
 
-        var output = computer.ContinueWithInput(1);
+        computer.ContinueWithInput(1, out var outputs);
 
-        return string.Join(',', output);
+        return string.Join(',', outputs);
     }
 
     public string Part2(long[] input)
     {
         var computer = new Computer(input);
 
-        var output = computer.ContinueWithInput(2);
+        computer.ContinueWithInput(2, out var output);
         return string.Join(',', output);
     }
 }
