@@ -4,6 +4,7 @@ using AoC.Puzzles._2019.Puzzles;
 using BenchmarkDotNet.Running;
 using System.Reflection;
 using AoC.Common.Interfaces;
+using System.Diagnostics;
 
 namespace AoC.Runner;
 
@@ -59,10 +60,18 @@ public class PuzzleRunner : IPuzzleRunner
         var parsed = puzzle.Parse(rawInput);
         var parsed2 = puzzle.Parse(rawInput);
 
+        var sw = Stopwatch.StartNew();
         var part1 = puzzle.Part1(parsed);
-        var part2 = puzzle.Part2(parsed2);
+        sw.Stop();
 
-        return new PuzzleResult(puzzleInfo, part1, part2);
+        var elapsedPart1 = sw.ElapsedMilliseconds;
+
+        sw.Restart();
+        var part2 = puzzle.Part2(parsed2);
+        sw.Stop();
+        var elapsedPart2 = sw.ElapsedMilliseconds;
+
+        return new PuzzleResult(puzzleInfo, part1, part2, elapsedPart1, elapsedPart2);
     }
 
     private static Dictionary<(int Year, int Day), Type> GetPuzzleInputProviders()

@@ -55,6 +55,8 @@ class AoCConsole
         
         var puzzlesToRun = PickPuzzles(puzzles);
 
+        _console.MarkupLineInterpolated($"Running puzzle [red]{string.Join(", ", puzzlesToRun)}[/].");
+
         var doBenchmark = _console.Confirm("Do you want to benchmark?", false);
 
         if (doBenchmark)
@@ -110,6 +112,7 @@ class AoCConsole
         foreach (var result in results)
         {
             tbl.AddRow(result.Puzzle.Day.ToString(), result.Puzzle.Name, result.Part1, result.Part2);
+            tbl.AddRow(string.Empty, string.Empty, result.ElapsedMsPart1 + "ms", result.ElapsedMsPart2 + "ms");
         }
 
         _console.Write(tbl);
@@ -146,7 +149,6 @@ class AoCConsole
 
         if (years.Length > 1)
         {
-            // Ask for the user's favorite fruit
             var chosenYear = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("What [green]year[/] do you want to execute?")
