@@ -52,7 +52,7 @@ class AoCConsole
         (var year, puzzles) = PickYear(puzzles, years);
 
         _console.MarkupLineInterpolated($"Running year [red]{year}[/].");
-        
+
         var puzzlesToRun = PickPuzzles(puzzles);
 
         _console.MarkupLineInterpolated($"Running puzzle [red]{string.Join(", ", puzzlesToRun.Select(x => x.Name))}[/].");
@@ -67,8 +67,6 @@ class AoCConsole
         {
             RunPuzzle(puzzlesToRun);
         }
-
-        _console.Write("Done!");
     }
 
     private void PerformBenchmark(PuzzleModel puzzleModel)
@@ -106,16 +104,22 @@ class AoCConsole
                 ctx.Refresh();
             });
 
-        var tbl = new Table();
-        tbl.AddColumns("Day", "Name", "Part 1", "Part 2");
-
         foreach (var result in results)
         {
-            tbl.AddRow(result.Puzzle.Day.ToString(), result.Puzzle.Name, result.Part1, result.Part2);
-            tbl.AddRow(string.Empty, string.Empty, result.ElapsedMsPart1 + "ms", result.ElapsedMsPart2 + "ms");
-        }
+            var grid = new Grid();
 
-        _console.Write(tbl);
+            grid.AddColumns(2);
+
+            var res1Panel = new Panel(result.Part1).Header("Part 1");
+            var res2Panel = new Panel(result.Part2).Header("Part 2");
+
+            grid.AddRow(res1Panel, res2Panel);
+            grid.AddRow(new Markup($"Took {result.ElapsedMsPart1}ms.").Alignment(Justify.Center), new Markup($"Took {result.ElapsedMsPart2}ms.").Alignment(Justify.Center));
+
+            var statsPanel = new Panel(grid).Header($"{result.Puzzle.Year} Day {result.Puzzle.Day:D2}");
+
+            _console.Write(statsPanel);
+        }
     }
 
     private static IReadOnlyCollection<PuzzleModel> PickPuzzles(IReadOnlyCollection<PuzzleModel> puzzles)
@@ -132,7 +136,6 @@ class AoCConsole
                     .PageSize(10)
                     .MoreChoicesText("[grey](Move up and down to reveal more years)[/]")
                     .AddChoices(days.Select(x => $"{x.Day} {x.Name}").Prepend("Latest")));
-
 
             if (int.TryParse(chosenDay.Split(' ')[0], out var chosenDayInt))
             {
