@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -15,6 +17,14 @@ namespace AoC.SourceGenerators
             "AC0001",
             "No input",
             "No input file was found for {0} day {1}",
+            "AoC",
+            DiagnosticSeverity.Warning,
+            true);
+
+        private static readonly DiagnosticDescriptor DuplicatePuzzleDescriptor = new(
+            "AC0002",
+            "Duplicate puzzle descriptor",
+            "The puzzle descriptor of year {0} day {1} was found twice",
             "AoC",
             DiagnosticSeverity.Warning,
             true);
@@ -57,16 +67,37 @@ namespace AoC.SourceGenerators
 
             generatorPath = Path.GetDirectoryName(generatorPath);
 
+            var duplicatePuzzles = enumerations.GroupBy(x => new { x.Year, x.Day })
+                .Where(x => x.Count() > 1)
+                .ToList();
+
+            if (duplicatePuzzles.Count != 0)
+            {
+                foreach(var duplicatePuzzlePair in duplicatePuzzles)
+                {
+                    context.CancellationToken.ThrowIfCancellationRequested();
+
+                    foreach (var puzzle in duplicatePuzzlePair)
+                    {
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(DuplicatePuzzleDescriptor,
+                            puzzle.PuzzleClass.GetLocation(),
+                            puzzle.Year,
+                            puzzle.Day));
+                    }
+                }
+
+                return;
+            }
+
             foreach (var puzzle in enumerations)
             {
-                if (context.CancellationToken.IsCancellationRequested)
-                {
-                    return;
-                }
-                
-                var dayName = puzzle.PuzzleClass.Identifier.ToString();
+                context.CancellationToken.ThrowIfCancellationRequested();
 
-                var fullPath = Path.Combine(generatorPath, $"../AoC.Puzzles/{puzzle.Year}/Input/{dayName}.txt");
+                var dayName = puzzle.Day.ToString("D2");
+                var yearDayName = $"Y{puzzle.Year}D{dayName}";
+
+                var fullPath = Path.Combine(generatorPath, "..", $"AoC.Puzzles.{puzzle.Year}", "Input", $"Day{dayName}.txt");
 
                 string rawInput = null;
                 try
@@ -93,12 +124,12 @@ using System;
 namespace {GetNamespace(puzzle.PuzzleClass).Name};
 
 [PuzzleInput({puzzle.Year}, {puzzle.Day})]
-public class {dayName}Input : IPuzzleInputProvider
+public class {yearDayName}Input : IPuzzleInputProvider
 {{
-    // Text from {fullPath}
-    public string GetRawInput() => {propertyContent};
+    // Text from {fullPath}.
+    public static string GetRawInput() => {propertyContent};
 }}";
-                context.AddSource($"{dayName}Input.g.cs", source);
+                context.AddSource($"{yearDayName}Input.g.cs", source);
             }
         }
 

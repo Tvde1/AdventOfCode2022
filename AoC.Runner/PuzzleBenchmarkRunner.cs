@@ -1,17 +1,13 @@
 ﻿using AoC.Common.Interfaces;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Jobs;
 
 namespace AoC.Runner;
 
-[SimpleJob(RuntimeMoniker.Net60, baseline: true)]
-[SimpleJob(RuntimeMoniker.Net70)]
-[SimpleJob(RuntimeMoniker.NativeAot70)]
 [HtmlExporter, MarkdownExporter]
 [MemoryDiagnoser(false)]
 public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TPuzzleInputProvider>
-        where TPuzzle : IPuzzle<TParsed>, new()
-        where TPuzzleInputProvider : IPuzzleInputProvider, new()
+    where TPuzzle : IPuzzle<TParsed>, new()
+    where TPuzzleInputProvider : IPuzzleInputProvider
 {
     private TPuzzle? _puzzle;
     private string? _rawInput;
@@ -20,8 +16,7 @@ public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TPuzzleInputProvider>
     [GlobalSetup]
     public void GetInput()
     {
-        var puzzleProvider = new TPuzzleInputProvider();
-        _rawInput = puzzleProvider.GetRawInput();
+        _rawInput = TPuzzleInputProvider.GetRawInput();
 
         _puzzle = new TPuzzle();
 

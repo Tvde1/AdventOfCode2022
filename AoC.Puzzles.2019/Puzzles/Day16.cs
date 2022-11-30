@@ -28,7 +28,6 @@ public class Day16 : IPuzzle<int[]>
 
     public string Part2(int[] input)
     {
-        return "Not implemented";
         var offset = int.Parse(string.Join(string.Empty, input.Take(7)));
 
         IEnumerable<int> yikes = input;

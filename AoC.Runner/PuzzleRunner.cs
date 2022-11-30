@@ -1,6 +1,5 @@
 ﻿using AoC.Common.Attributes;
 using AoC.Common.Models;
-using AoC.Puzzles._2019.Puzzles;
 using BenchmarkDotNet.Running;
 using System.Reflection;
 using AoC.Common.Interfaces;
@@ -13,6 +12,11 @@ public class PuzzleRunner : IPuzzleRunner
     private readonly IReadOnlyList<PuzzleModel> _puzzles;
     private readonly MethodInfo _runMethod;
     private readonly MethodInfo _benchmarkMethod;
+
+    private static readonly Assembly[] assemblies =
+    {
+        Assembly.GetAssembly(typeof(Puzzles._2019.Puzzles.Day01))!,
+    };
 
     public PuzzleRunner()
     {
@@ -30,7 +34,7 @@ public class PuzzleRunner : IPuzzleRunner
     {
         var method = _runMethod.MakeGenericMethod(puzzle.PuzzleType, puzzle.ParsedType, puzzle.InputType);
 
-        return (PuzzleResult) method.Invoke(null, new object[] { puzzle })!;
+        return (PuzzleResult)method.Invoke(null, new object[] { puzzle })!;
     }
 
     public void BenchmarkPuzzle(PuzzleModel puzzle)
@@ -42,7 +46,7 @@ public class PuzzleRunner : IPuzzleRunner
 
     private static void RunBenchmark<TPuzzle, TParsed, TPuzzleInputProvider>()
         where TPuzzle : IPuzzle<TParsed>, new()
-        where TPuzzleInputProvider : IPuzzleInputProvider, new()
+        where TPuzzleInputProvider : IPuzzleInputProvider
     {
         var summary = BenchmarkRunner.Run<PuzzleBenchmarkRunner<TPuzzle, TParsed, TPuzzleInputProvider>>();
         Console.WriteLine(summary.ToString());
@@ -50,12 +54,11 @@ public class PuzzleRunner : IPuzzleRunner
 
     private static PuzzleResult RunPuzzle<TPuzzle, TParsed, TPuzzleInputProvider>(PuzzleModel puzzleInfo)
         where TPuzzle : IPuzzle<TParsed>, new()
-        where TPuzzleInputProvider : IPuzzleInputProvider, new()
+        where TPuzzleInputProvider : IPuzzleInputProvider
     {
-        var inputProvider = new TPuzzleInputProvider();
         var puzzle = new TPuzzle();
 
-        var rawInput = inputProvider.GetRawInput();
+        var rawInput = TPuzzleInputProvider.GetRawInput();
 
         var parsed = puzzle.Parse(rawInput);
         var parsed2 = puzzle.Parse(rawInput);
@@ -76,14 +79,14 @@ public class PuzzleRunner : IPuzzleRunner
 
     private static Dictionary<(int Year, int Day), Type> GetPuzzleInputProviders()
     {
-        var assembly = Assembly.GetAssembly(typeof(Day01));
-
-        var c = assembly!.GetTypes()
-            .Select(x => new
-            {
-                Type = x,
-                PuzzleAttribute = x.GetCustomAttribute<PuzzleInputAttribute>(),
-            })
+        var c = assemblies
+            .SelectMany(
+                assembly => assembly!.GetTypes(),
+                (assembly, type) => new
+                {
+                    Type = type,
+                    PuzzleAttribute = type.GetCustomAttribute<PuzzleInputAttribute>(),
+                })
             .Where(x => x.PuzzleAttribute != null);
 
         return c.ToDictionary(
@@ -94,14 +97,15 @@ public class PuzzleRunner : IPuzzleRunner
     private static IReadOnlyList<PuzzleModel> GetAllPuzzles()
     {
         var puzzleInputProviders = GetPuzzleInputProviders();
-        var assembly = Assembly.GetAssembly(typeof(Day01));
 
-        var c = assembly!.GetTypes()
-            .Select(x => new
-            {
-                Type = x,
-                PuzzleAttribute = x.GetCustomAttribute<PuzzleAttribute>(),
-            })
+        var c = assemblies
+            .SelectMany(
+                assembly => assembly!.GetTypes(),
+                (assembly, type) => new
+                {
+                    Type = type,
+                    PuzzleAttribute = type.GetCustomAttribute<PuzzleAttribute>(),
+                })
             .Where(x => x.PuzzleAttribute != null);
 
         return c.Select(x => new PuzzleModel(

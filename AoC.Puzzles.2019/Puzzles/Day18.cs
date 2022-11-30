@@ -1,6 +1,7 @@
 ﻿using AoC.Common.Attributes;
 using AoC.Common.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using System.Numerics;
 
 namespace AoC.Puzzles._2019.Puzzles;
 
@@ -15,9 +16,9 @@ public class Day18 : IPuzzle<(Maze, MazeState)>
     public string Part1((Maze, MazeState) input)
     {
         var maze = input.Item1;
-        var queue = new PriorityQueue<(MazeState State, int Steps), int>();
+        var queue = new PriorityQueue<(MazeState State, int Steps), (int Cost, int Heuristic)>(new CustomHeuristicComparer());
 
-        queue.Enqueue((input.Item2, 0), 0);
+        queue.Enqueue((input.Item2, 0), (0, 0));
 
         var visited = new HashSet<int>();
 
@@ -45,21 +46,39 @@ public class Day18 : IPuzzle<(Maze, MazeState)>
                     return newSteps.ToString();
                 }
 
-                queue.Enqueue((newState, newSteps), CreateHeuristic(state, specialSpotCount));
+                queue.Enqueue((newState, newSteps), CreatePriority(state, specialSpotCount));
             }
         }
 
         return "No valid path";
     }
 
-    private static int CreateHeuristic((MazeState State, int Steps) state, int specialSpotCount)
+    private static (int Cost, int Heuristic) CreatePriority((MazeState State, int Steps) state, int specialSpotCount)
     {
-        return state.Steps + specialSpotCount;
+        return (state.Steps, specialSpotCount);
     }
 
     public string Part2((Maze, MazeState) input)
     {
         return "Not implemented";
+    }
+}
+
+internal sealed class CustomHeuristicComparer : IComparer<(int Cost, int Heuristic)>
+{
+    public int Compare((int Cost, int Heuristic) x, (int Cost, int Heuristic) y)
+    {
+        if (x.Cost + x.Heuristic > y.Cost + y.Heuristic)
+        {
+            return 1;
+        }
+
+        if (x.Cost + x.Heuristic < y.Cost + y.Heuristic)
+        {
+            return -1;
+        }
+
+        return x.Cost.CompareTo(y.Cost);
     }
 }
 
@@ -135,12 +154,18 @@ public record MazeState
 
     public int GetHash()
     {
-        var hashCode = HashCode.Combine(Cursor.X, Cursor.Y);
+        var hashCode = 0;
 
-        foreach(var item in SpecialSpots)
+        foreach (var item in SpecialSpots.Values)
         {
-            hashCode = HashCode.Combine(item, hashCode);
+            if (char.IsUpper(item))
+            {
+                hashCode |= 1 << (item - 'A');
+            }
         }
+
+        hashCode *= 100_00;
+        hashCode += (Cursor.X * 100) + Cursor.Y;
 
         return hashCode;
     }

@@ -9,14 +9,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoC.Common", "AoC.Common\Ao
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoC.Console", "AoC.Console\AoC.Console.csproj", "{E71E6D5B-810D-4C07-B081-3CA52E958489}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoC.Puzzles", "AoC.Puzzles\AoC.Puzzles.csproj", "{B9824DD3-6F8E-4426-81CE-C2747EB9415F}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D4B9F1B9-16AE-4252-8356-2F4CA5822423}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC.SourceGenerators", "AoC.SourceGenerators\AoC.SourceGenerators.csproj", "{F53C47ED-F099-4BEF-A020-CA09545A03F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AoC.SourceGenerators", "AoC.SourceGenerators\AoC.SourceGenerators.csproj", "{F53C47ED-F099-4BEF-A020-CA09545A03F8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Puzzles", "Puzzles", "{8BA3236A-4624-4A0B-9FDD-2344D3D262AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC.Puzzles.2019", "AoC.Puzzles.2019\AoC.Puzzles.2019.csproj", "{5E85422D-E88F-46A7-A7F6-DEB3A4087A04}"
+EndProject
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,17 +39,20 @@ Global
 		{E71E6D5B-810D-4C07-B081-3CA52E958489}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E71E6D5B-810D-4C07-B081-3CA52E958489}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E71E6D5B-810D-4C07-B081-3CA52E958489}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9824DD3-6F8E-4426-81CE-C2747EB9415F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9824DD3-6F8E-4426-81CE-C2747EB9415F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9824DD3-6F8E-4426-81CE-C2747EB9415F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9824DD3-6F8E-4426-81CE-C2747EB9415F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F53C47ED-F099-4BEF-A020-CA09545A03F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F53C47ED-F099-4BEF-A020-CA09545A03F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F53C47ED-F099-4BEF-A020-CA09545A03F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F53C47ED-F099-4BEF-A020-CA09545A03F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E85422D-E88F-46A7-A7F6-DEB3A4087A04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E85422D-E88F-46A7-A7F6-DEB3A4087A04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E85422D-E88F-46A7-A7F6-DEB3A4087A04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E85422D-E88F-46A7-A7F6-DEB3A4087A04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5E85422D-E88F-46A7-A7F6-DEB3A4087A04} = {8BA3236A-4624-4A0B-9FDD-2344D3D262AD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0B6E70BC-298A-4137-8DD4-0A89FAC0C38D}

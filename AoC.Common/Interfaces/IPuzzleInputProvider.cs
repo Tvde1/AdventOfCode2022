@@ -2,5 +2,5 @@
 
 public interface IPuzzleInputProvider
 {
-    public string GetRawInput();
+    public static abstract string GetRawInput();
 }

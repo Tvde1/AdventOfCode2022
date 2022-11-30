@@ -55,7 +55,7 @@ class AoCConsole
         
         var puzzlesToRun = PickPuzzles(puzzles);
 
-        _console.MarkupLineInterpolated($"Running puzzle [red]{string.Join(", ", puzzlesToRun)}[/].");
+        _console.MarkupLineInterpolated($"Running puzzle [red]{string.Join(", ", puzzlesToRun.Select(x => x.Name))}[/].");
 
         var doBenchmark = _console.Confirm("Do you want to benchmark?", false);
 

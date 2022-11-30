@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AoC.Common\AoC.Common.csproj" />
-    <ProjectReference Include="..\AoC.Puzzles\AoC.Puzzles.csproj" />
+    <ProjectReference Include="..\AoC.Puzzles.2019\AoC.Puzzles.2019.csproj" />
   </ItemGroup>
 
 </Project>
