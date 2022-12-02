@@ -3,7 +3,7 @@ using AoC.Common.Interfaces;
 
 namespace AoC.Puzzles._2022.Puzzles;
 
-[Puzzle(2022, 1, "Puzzle one")]
+[Puzzle(2022, 1, "Calories")]
 public class Day01 : IPuzzle<int[][]>
 {
     public int[][] Parse(string inputText)
