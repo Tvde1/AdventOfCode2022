@@ -1,8 +1,11 @@
 ﻿using AoC.Common.Interfaces;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 
 namespace AoC.Runner;
 
+[SimpleJob(RuntimeMoniker.Net70)]
+[SimpleJob(RuntimeMoniker.NativeAot70)]
 [HtmlExporter, MarkdownExporter]
 [MemoryDiagnoser(false)]
 public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TPuzzleInputProvider>
