@@ -4,23 +4,11 @@ using AoC.Common.Interfaces;
 
 namespace AoC.Puzzles._2022.Puzzles;
 
-[Puzzle(2022, 5, "Crane operator")]
+[Puzzle(2022, 5, "Supply Stacks")]
 public class Day05 : IPuzzle<CraneOperatorInstructions>
 {
     public CraneOperatorInstructions Parse(string inputText)
     {
-//         inputText = """
-//             [D]    
-//         [N] [C]    
-//         [Z] [M] [P]
-//          1   2   3 
-//
-//         move 1 from 2 to 1
-//         move 3 from 1 to 3
-//         move 2 from 2 to 1
-//         move 1 from 1 to 2
-//         """;
-
         return CraneOperatorInstructions.Parse(inputText);
     }
 
@@ -49,10 +37,9 @@ public class Day05 : IPuzzle<CraneOperatorInstructions>
     {
         var configuration = input.Configuration;
 
-
+        Span<char> onCrane = stackalloc char[input.Instructions.Max(x => x.Count)];
         foreach (var instruction in input.Instructions)
         {
-            var onCrane = new char[instruction.Count];
             for (var i = 0; i < instruction.Count; i++)
             {
                 onCrane[i] = configuration[instruction.From].Pop();
@@ -60,7 +47,7 @@ public class Day05 : IPuzzle<CraneOperatorInstructions>
 
             for (var i = 1; i <= instruction.Count; i++)
             {
-                configuration[instruction.To].Push(onCrane[^i]);
+                configuration[instruction.To].Push(onCrane[instruction.Count - i]);
             }
         }
 
@@ -77,9 +64,6 @@ public class Day05 : IPuzzle<CraneOperatorInstructions>
 public record CraneOperatorInstructions(Dictionary<int, Stack<char>> Configuration,
     List<(int Count, int From, int To)> Instructions)
 {
-    // private static Regex _instructionRegex =
-    //     new(@"move (?<count>\d{1,2}) from (?<from>\d) to (?<to>\d)", RegexOptions.Compiled | RegexOptions.NonBacktracking);
-
     public static CraneOperatorInstructions Parse(ReadOnlySpan<char> arg)
     {
         var configuration = new Dictionary<int, List<char>>();
