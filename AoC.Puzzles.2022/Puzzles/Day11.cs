@@ -12,7 +12,6 @@ public class Day11 : IPuzzle<Monkey[]>
 {
     public Monkey[] Parse(string inputText)
     {
-        inputText = Example.Text;
         return inputText.Split(Environment.NewLine + Environment.NewLine)
             .Select(Monkey.Parse).ToArray();
     }
@@ -36,17 +35,20 @@ public class Day11 : IPuzzle<Monkey[]>
             }
         }
 
-        return input.Select(x => x.InspectCount).OrderDescending().Take(2).Aggregate(1UL, (i, i1) => i * i1).ToString();
+        return input.Select(x => x.InspectCount).OrderDescending().Take(2).Aggregate(1L, (i, i1) => i * i1).ToString();
     }
 
     public string Part2(Monkey[] input)
     {
         void ItemHandler(ThrowOperation item) => input[item.ReceiverMonkey].ReceiveItem(item);
 
+        var totalDivThings = input.Select(x => x.DivisibleBy).Aggregate(1, (a, b) => a * b);
+        
         foreach (var m in input)
         {
             m.ThrownItems.Subscribe(ItemHandler);
             m.DoWorry = true;
+            m.NormalizeWith = totalDivThings;
         }
 
         for (var roundNumber = 0; roundNumber < 10_000; roundNumber++)
@@ -59,7 +61,7 @@ public class Day11 : IPuzzle<Monkey[]>
             }
         }
 
-        return input.Select(x => x.InspectCount).OrderDescending().Take(2).Aggregate(1UL, (i, i1) => i * i1).ToString();
+        return input.Select(x => x.InspectCount).OrderDescending().Take(2).Aggregate(1L, (i, i1) => i * i1).ToString();
     }
 }
 
@@ -69,18 +71,23 @@ public partial record Monkey
 
     private readonly Subject<ThrowOperation> _throwSubject = new();
     private readonly Queue<BackpackItem> _items = new();
-    private readonly Func<ulong, ulong> _riskLevelModifier;
-    private readonly Func<ulong, int> _riskLevelToReceiverMonkey;
+    private readonly Func<long, long> _riskLevelModifier;
+    private readonly Func<long, int> _riskLevelToReceiverMonkey;
 
     public int Number { get; }
+    public int DivisibleBy { get; }
+
     public IObservable<ThrowOperation> ThrownItems => _throwSubject.AsObservable();
-    public ulong InspectCount { get; private set; }
+    public long InspectCount { get; private set; }
+
     public bool DoWorry { get; set; }
+    public int? NormalizeWith { get; set; }
 
     private Monkey(int number,
         IEnumerable<BackpackItem> startingItems,
-        Func<ulong, ulong> riskLevelModifier,
-        Func<ulong, int> riskLevelToReceiverMonkey)
+        Func<long, long> riskLevelModifier,
+        Func<long, int> riskLevelToReceiverMonkey,
+        int divisibleBy)
     {
         Number = number;
         foreach (var startingItem in startingItems)
@@ -90,6 +97,7 @@ public partial record Monkey
 
         _riskLevelModifier = riskLevelModifier;
         _riskLevelToReceiverMonkey = riskLevelToReceiverMonkey;
+        DivisibleBy = divisibleBy;
     }
 
     public bool ThrowNext()
@@ -107,8 +115,13 @@ public partial record Monkey
             currentItem.CalmDown();
         }
 
-        var newRiskLevelToReceiverMonkey = currentItem.CalculateReceiverMonkey(_riskLevelToReceiverMonkey);
-        _throwSubject.OnNext(new ThrowOperation(currentItem, newRiskLevelToReceiverMonkey));
+        if (NormalizeWith is not null)
+        {
+            currentItem.Normalize(NormalizeWith.Value);
+        }
+
+        var receiverMonkey = currentItem.CalculateReceiverMonkey(_riskLevelToReceiverMonkey);
+        _throwSubject.OnNext(new ThrowOperation(currentItem, receiverMonkey));
         return true;
     }
 
@@ -130,12 +143,12 @@ public partial record Monkey
         var items = match.Groups["items"].Value.Split(", ").Select(BackpackItem.Parse);
         var operation = match.Groups["operation"].Value;
         var operationNumber = match.Groups["operationNumber"].Value;
-        var divisibleBy = uint.Parse(match.Groups["divisibleBy"].Value);
+        var divisibleBy = int.Parse(match.Groups["divisibleBy"].Value);
         var ifTrue = int.Parse(match.Groups["ifTrue"].Value);
         var ifFalse = int.Parse(match.Groups["ifFalse"].Value);
 
-        ulong? possibleOperationNumber = ulong.TryParse(operationNumber, out var a) ? a : null;
-        Func<ulong, ulong> riskLevelModifier = (operation, possibleOperationNumber) switch
+        int? possibleOperationNumber = int.TryParse(operationNumber, out var a) ? a : null;
+        Func<long, long> riskLevelModifier = (operation, possibleOperationNumber) switch
         {
             ("+", null) => x => x + x,
             ("*", null) => x => x * x,
@@ -144,10 +157,10 @@ public partial record Monkey
             _ => throw new MonkeyException("Invalid risk level operation"),
         };
 
-        Func<ulong, int> riskLevelToReceiverMonkey =
+        Func<long, int> riskLevelToReceiverMonkey =
             x => x % divisibleBy == 0 ? ifTrue : ifFalse;
 
-        return new Monkey(number, items, riskLevelModifier, riskLevelToReceiverMonkey);
+        return new Monkey(number, items, riskLevelModifier, riskLevelToReceiverMonkey, divisibleBy);
     }
 
     [GeneratedRegex("""
@@ -159,20 +172,22 @@ public partial record Monkey
 
 public record BackpackItem
 {
-    private ulong RiskLevel { get; set; }
+    private long RiskLevel { get; set; }
 
-    private BackpackItem(ulong riskLevel)
+    private BackpackItem(int riskLevel)
     {
         RiskLevel = riskLevel;
     }
 
-    public void ApplyModifier(Func<ulong, ulong> modifier) => RiskLevel = modifier(RiskLevel);
+    public void ApplyModifier(Func<long, long> modifier) => RiskLevel = modifier(RiskLevel);
 
     public void CalmDown() => RiskLevel /= 3;
 
-    public static BackpackItem Parse(string @in) => new(ulong.Parse(@in));
+    public void Normalize(int normalizeWith) => RiskLevel %= normalizeWith;
+    
+    public static BackpackItem Parse(string @in) => new(int.Parse(@in));
 
-    public int CalculateReceiverMonkey(Func<ulong, int> riskLevelToReceiverMonkey) =>
+    public int CalculateReceiverMonkey(Func<long, int> riskLevelToReceiverMonkey) =>
         riskLevelToReceiverMonkey(RiskLevel);
 }
 
@@ -183,37 +198,4 @@ public class MonkeyException : Exception
     public MonkeyException(string message) : base(message)
     {
     }
-}
-
-file class Example
-{
-    public const string Text = """
-Monkey 0:
-  Starting items: 79, 98
-  Operation: new = old * 19
-  Test: divisible by 23
-    If true: throw to monkey 2
-    If false: throw to monkey 3
-
-Monkey 1:
-  Starting items: 54, 65, 75, 74
-  Operation: new = old + 6
-  Test: divisible by 19
-    If true: throw to monkey 2
-    If false: throw to monkey 0
-
-Monkey 2:
-  Starting items: 79, 60, 97
-  Operation: new = old * old
-  Test: divisible by 13
-    If true: throw to monkey 1
-    If false: throw to monkey 3
-
-Monkey 3:
-  Starting items: 74
-  Operation: new = old + 3
-  Test: divisible by 17
-    If true: throw to monkey 0
-    If false: throw to monkey 1
-""";
 }
