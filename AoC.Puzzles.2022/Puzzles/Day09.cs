@@ -9,17 +9,6 @@ public class Day09 : IPuzzle<RopeCommand[]>
 {
     public RopeCommand[] Parse(string inputText)
     {
-        inputText = """
-            R 5
-            U 8
-            L 8
-            D 3
-            R 17
-            D 10
-            L 25
-            U 20
-            """;
-
         List<RopeCommand> commands = new();
         var readOnlySpan = inputText.AsSpan();
         foreach (var line in readOnlySpan.EnumerateLines())
@@ -74,7 +63,7 @@ public class Day09 : IPuzzle<RopeCommand[]>
 
     public string Part2(RopeCommand[] input)
     {
-        var knots = new (int X, int Y)[9];
+        var knots = new (int X, int Y)[10];
 
         var tailVisited = new HashSet<(int X, int Y)>
         {
@@ -110,39 +99,67 @@ public class Day09 : IPuzzle<RopeCommand[]>
                     knots[knotI].Y += tailUpdate.Y;
                 }
 
-                tailVisited.Add(knots[8]);
+                tailVisited.Add(knots[^1]);
+
+                Print(knots[0], knots[1..], tailVisited, command, i);
             }
         }
 
         return tailVisited.Count.ToString();
     }
 
-    private static void Print((int X, int Y) head, (int X, int Y) tail, HashSet<(int X, int Y)> visited)
+    private static void Print((int X, int Y) head,
+        (int X, int Y)[] tail,
+        IReadOnlySet<(int X, int Y)> visited,
+        RopeCommand c,
+        int i)
     {
         // var minX = Math.Min(head.X, Math.Min(tail.X, visited.Min(v => v.X))) - 1;
         // var maxX = Math.Max(head.X, Math.Max(tail.X, visited.Max(v => v.X))) + 1;
         // var minY = Math.Min(head.Y, Math.Min(tail.Y)) + 1;
         // var maxY = Math.Max(head.Y, tail.Y) - 1;
 
-        var minX = 0;
-        var minY = -5;
-        var maxX = 5;
-        var maxY = 0;
+        var minX = -5;
+        var minY = -10;
+        var maxX = 10;
+        var maxY = 5;
 
         var sb = new StringBuilder();
+
+        sb.Append("Command: ");
+        sb.Append(c.Direction);
+        sb.Append(" ");
+        sb.Append(c.Count);
+        sb.Append(" (");
+        sb.Append(i);
+        sb.Append(')');
+        sb.AppendLine();
+
         for (var y = minY; y <= maxY; y++)
         {
             for (var x = minX; x <= maxX; x++)
             {
+                var s = false;
                 if (x == head.X && y == head.Y)
                 {
                     sb.Append('H');
+                    continue;
                 }
-                else if (x == tail.X && y == tail.Y)
+
+                for (var tailIndex = 0; tailIndex < tail.Length; tailIndex++)
                 {
-                    sb.Append('T');
+                    var t = tail[tailIndex];
+                    if (t.X == x && t.Y == y)
+                    {
+                        sb.Append(tailIndex);
+                        s = true;
+                        break;
+                    }
                 }
-                else if (x == 0 && y == 0)
+
+                if (s) continue;
+
+                if (x == 0 && y == 0)
                 {
                     sb.Append('s');
                 }
@@ -168,6 +185,11 @@ public class Day09 : IPuzzle<RopeCommand[]>
     {
         return (headPosition.X - tailPosition.X, headPosition.Y - tailPosition.Y) switch
         {
+            (2, 2) => (1, 1),
+            (-2, 2) => (-1, 1),
+            (2, -2) => (1, -1),
+            (-2, -2) => (-1, -1),
+            
             (2, 1) => (1, 1),
             (2, -1) => (1, -1),
             (-2, 1) => (-1, 1),
@@ -178,18 +200,22 @@ public class Day09 : IPuzzle<RopeCommand[]>
             (1, -2) => (1, -1),
             (-1, -2) => (-1, -1),
 
-            (2, _) => (1, 0),
-            (-2, _) => (-1, 0),
+            (2, 0) => (1, 0),
+            (-2, 0) => (-1, 0),
 
-            (_, 2) => (0, 1),
-            (_, -2) => (0, -1),
+            (0, 2) => (0, 1),
+            (0, -2) => (0, -1),
 
             (0, 0) => (0, 0),
+            (1, 0) => (0, 0),
+            (-1, 0) => (0, 0),
+            (0, 1) => (0, 0),
+            (0, -1) => (0, 0),
 
-            (1, _) => (0, 0),
-            (-1, _) => (0, 0),
-            (_, 1) => (0, 0),
-            (_, -1) => (0, 0),
+            (1, 1) => (0, 0),
+            (1, -1) => (0, 0),
+            (-1, 1) => (0, 0),
+            (-1, -1) => (0, 0),
 
             _ => throw new ArgumentOutOfRangeException($"Invalid Tail vector? {headPosition} {tailPosition}"),
         };
@@ -220,5 +246,5 @@ public enum Direction
     Up,
     Down,
     Left,
-    Right
+    Right,
 }
