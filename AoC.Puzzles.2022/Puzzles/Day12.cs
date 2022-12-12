@@ -8,14 +8,6 @@ public class Day12 : IPuzzle<char[,]>
 {
     public char[,] Parse(string inputText)
     {
-        // inputText = """
-        //     Sabqponm
-        //     abcryxxl
-        //     accszExk
-        //     acctuvwj
-        //     abdefghi
-        //     """;
-
         var span = inputText.AsSpan();
 
         var width = span.IndexOf(Environment.NewLine, StringComparison.Ordinal);
@@ -51,7 +43,6 @@ public class Day12 : IPuzzle<char[,]>
 
     public string Part2(char[,] input)
     {
-        var startingPosition = FindPosition(input, 'S');
         var endPosition = FindPosition(input, 'E');
 
         var starts = new List<(int X, int Y)>();
@@ -67,13 +58,11 @@ public class Day12 : IPuzzle<char[,]>
             }
         }
 
-        var paths = starts.Select(x => new
-        {
-            StartPos = x,
-            ShortestPath = PathfindThing(input, x, endPosition, out var s) ? s : -1,
-        });
-
-        return paths.Where(x => x.ShortestPath > 0).MinBy(x => x.ShortestPath).ToString();
+        return starts
+            .Select(x => PathfindThing(input, x, endPosition, out var s) ? s : -1)
+            .Where(x => x > 0)
+            .Min()
+            .ToString();
     }
 
     private bool PathfindThing(char[,] input,
