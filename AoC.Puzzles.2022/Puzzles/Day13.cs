@@ -75,7 +75,7 @@ public class Day13 : IPuzzle<(Packet Left, Packet Right)[]>
     }
 }
 
-public readonly record struct Packet : IComparable<Packet>
+public record Packet : IComparable<Packet>
 {
     private readonly int? _intValue;
     private readonly Packet[]? _listValue;
@@ -92,16 +92,12 @@ public readonly record struct Packet : IComparable<Packet>
 
     [MemberNotNullWhen(true, nameof(_intValue))]
     [MemberNotNullWhen(false, nameof(_listValue))]
-    public bool IsSingleValue => _intValue.HasValue;
+    private bool IsSingleValue => _intValue.HasValue;
 
     public bool IsDividerOne => _listValue is [{ _listValue: [{ _intValue: 2, },], },];
     public bool IsDividerTwo => _listValue is [{ _listValue: [{ _intValue: 6, },], },];
 
-    public Packet Wrap() =>
-        new(new[]
-        {
-            this,
-        });
+    private Packet Wrap() => new(new[] { this, });
 
     public static Packet Parse(ReadOnlySpan<char> span, out int charactersRead)
     {
@@ -136,7 +132,7 @@ public readonly record struct Packet : IComparable<Packet>
 
     public override string ToString()
     {
-        return IsSingleValue ? _intValue.Value.ToString() : $"[{string.Join(',', _listValue!)}]";
+        return IsSingleValue ? _intValue.Value.ToString() : $"[{string.Join(',', (IEnumerable<Packet>) _listValue)}]";
     }
 
     public int CompareTo(Packet other)
