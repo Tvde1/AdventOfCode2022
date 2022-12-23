@@ -35,7 +35,7 @@ public class PuzzleRunner : IPuzzleRunner
     {
         var method = _runMethod.MakeGenericMethod(puzzle.PuzzleType, puzzle.ParsedType, puzzle.InputType);
 
-        return (PuzzleResult)method.Invoke(null, new object[] { puzzle })!;
+        return (PuzzleResult)method.Invoke(null, new object[] { puzzle, })!;
     }
 
     public void BenchmarkPuzzle(PuzzleModel puzzle)
