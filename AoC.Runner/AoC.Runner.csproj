@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -11,13 +11,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.10" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AoC.Common\AoC.Common.csproj" />
     <ProjectReference Include="..\AoC.Puzzles.2019\AoC.Puzzles.2019.csproj" />
     <ProjectReference Include="..\AoC.Puzzles.2022\AoC.Puzzles.2022.csproj" />
+    <ProjectReference Include="..\AoC.Puzzles.2023\AoC.Puzzles.2023.csproj" />
   </ItemGroup>
 
 </Project>

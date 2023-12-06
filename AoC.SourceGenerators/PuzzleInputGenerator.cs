@@ -133,24 +133,22 @@ public class {yearDayName}Input : IPuzzleInputProvider
 
         private static string FilePath([CallerFilePath] string path = null) => path;
 
-        private static BaseNamespaceDeclarationSyntax GetNamespace(BaseTypeDeclarationSyntax syntax)
+        private static BaseNamespaceDeclarationSyntax GetNamespace(SyntaxNode syntax)
         {
             var potentialNamespaceParent = syntax.Parent;
 
             while (potentialNamespaceParent != null)
             {
-                if (potentialNamespaceParent is NamespaceDeclarationSyntax namespaceDeclarationSyntax)
+                switch (potentialNamespaceParent)
                 {
-                    return namespaceDeclarationSyntax;
+                    case NamespaceDeclarationSyntax namespaceDeclarationSyntax:
+                        return namespaceDeclarationSyntax;
+                    case FileScopedNamespaceDeclarationSyntax fileScopedNamespaceDeclarationSyntax:
+                        return fileScopedNamespaceDeclarationSyntax;
+                    default:
+                        potentialNamespaceParent = potentialNamespaceParent.Parent;
+                        break;
                 }
-
-                if (potentialNamespaceParent is FileScopedNamespaceDeclarationSyntax
-                    fileScopedNamespaceDeclarationSyntax)
-                {
-                    return fileScopedNamespaceDeclarationSyntax;
-                }
-
-                potentialNamespaceParent = potentialNamespaceParent.Parent;
             }
 
             return null;

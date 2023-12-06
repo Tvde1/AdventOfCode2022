@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC.Puzzles.2019", "AoC.Puz
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC.Puzzles.2022", "AoC.Puzzles.2022\AoC.Puzzles.2022.csproj", "{62F6153D-D097-4104-8E5B-BB8575E0E3D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AoC.Puzzles.2023", "AoC.Puzzles.2023\AoC.Puzzles.2023.csproj", "{4B8CD536-10FE-47D3-963F-CDB4D7440BC5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +54,10 @@ Global
 		{62F6153D-D097-4104-8E5B-BB8575E0E3D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62F6153D-D097-4104-8E5B-BB8575E0E3D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62F6153D-D097-4104-8E5B-BB8575E0E3D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B8CD536-10FE-47D3-963F-CDB4D7440BC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B8CD536-10FE-47D3-963F-CDB4D7440BC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B8CD536-10FE-47D3-963F-CDB4D7440BC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B8CD536-10FE-47D3-963F-CDB4D7440BC5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,6 +65,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5E85422D-E88F-46A7-A7F6-DEB3A4087A04} = {8BA3236A-4624-4A0B-9FDD-2344D3D262AD}
 		{62F6153D-D097-4104-8E5B-BB8575E0E3D9} = {8BA3236A-4624-4A0B-9FDD-2344D3D262AD}
+		{4B8CD536-10FE-47D3-963F-CDB4D7440BC5} = {8BA3236A-4624-4A0B-9FDD-2344D3D262AD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0B6E70BC-298A-4137-8DD4-0A89FAC0C38D}

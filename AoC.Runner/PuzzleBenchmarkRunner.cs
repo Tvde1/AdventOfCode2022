@@ -4,14 +4,14 @@ using BenchmarkDotNet.Jobs;
 
 namespace AoC.Runner;
 
-[SimpleJob(RuntimeMoniker.Net70)]
+[SimpleJob(RuntimeMoniker.Net80)]
 [HtmlExporter, MarkdownExporter]
 [MemoryDiagnoser(false)]
 public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TPuzzleInputProvider>
     where TPuzzle : IPuzzle<TParsed>, new()
     where TPuzzleInputProvider : IPuzzleInputProvider
 {
-    private readonly TPuzzle _puzzle = new TPuzzle();
+    private readonly TPuzzle _puzzle = new();
     private readonly string _rawInput = TPuzzleInputProvider.GetRawInput();
     private TParsed? _parsed;
 
