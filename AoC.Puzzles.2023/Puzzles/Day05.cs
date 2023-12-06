@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
+using System.Text;
 using AoC.Common.Attributes;
 using AoC.Common.Interfaces;
 
 namespace AoC.Puzzles._2023.Puzzles;
 
-[Puzzle(2023, 5, "asdf")]
+[Puzzle(2023, 5, "If You Give A Seed A Fertilizer")]
 public class Day05 : IPuzzle<Day05.Almanac>
 {
     public record Almanac(long[] Seeds, Dictionary<string, Map> MapsBySource)
@@ -21,6 +21,17 @@ public class Day05 : IPuzzle<Day05.Almanac>
                 .ToDictionary(p => p.From);
 
             return new Almanac(seeds, maps);
+        }
+
+        public void Print(StringBuilder builder)
+        {
+            builder.AppendLine($"Seeds: {string.Join(" ", Seeds)}");
+
+            foreach (var range in MapsBySource.Values)
+            {
+                range.Print(builder);
+            }
+            builder.AppendLine();
         }
     }
 
@@ -42,6 +53,18 @@ public class Day05 : IPuzzle<Day05.Almanac>
             
             return new(from, to, mapRanges);
         }
+
+        public void Print(StringBuilder builder)
+        {
+            builder.AppendLine($"{From}-to-{To} map:");
+            builder.AppendLine();
+
+            foreach(var range in Ranges)
+            {
+                range.Print(builder);
+            }
+            builder.AppendLine();
+        }
     }
 
     public record MapRange(long DestinationRangeStart, long SourceRangeStart, long RangeLength)
@@ -61,6 +84,11 @@ public class Day05 : IPuzzle<Day05.Almanac>
             var third = long.Parse(source[..]);
 
             return new MapRange(first, second, third);
+        }
+        
+        public void Print(StringBuilder builder)
+        {
+            builder.AppendLine($"{DestinationRangeStart} {SourceRangeStart} {RangeLength}");
         }
     }
 
@@ -101,7 +129,7 @@ public class Day05 : IPuzzle<Day05.Almanac>
                    60 56 37
                    56 93 4
                    """;
-        rawInput = temp;
+        //rawInput = temp;
         return Almanac.Parse(rawInput);
     }
 
@@ -116,68 +144,29 @@ public class Day05 : IPuzzle<Day05.Almanac>
             .Select(x => ConvertSingle(x, "temperature", input))
             .Select(x => ConvertSingle(x, "humidity", input))
             .ToList();
+
         return a.Min().ToString();
     }
 
     public string Part2(Almanac input)
     {
-        var b = input.Seeds.Chunk(2)
-            .Select(x => new SeedRange(x[0], x[1]))
-            .ToList();
-        
-        var a = b.SelectMany(x => Enumerable.Range((int) x.From, (int) x.Length))
-            .Select(x => (long) x)
-            .ToList();
-
-        Compare(a, b);
-
-        a = a.Select(x => ConvertSingle(x, "seed", input)).ToList();
-        b = b.SelectMany(x => ConvertRange(x, "seed", input)).ToList();
-        Compare(a, b);
-
-        a = a.Select(x => ConvertSingle(x, "soil", input)).ToList();
-        b = b.SelectMany(x => ConvertRange(x, "soil", input)).ToList();
-        Compare(a, b);
-        
-        a = a.Select(x => ConvertSingle(x, "fertilizer", input)).ToList();
-        b = b.SelectMany(x => ConvertRange(x, "fertilizer", input)).ToList();
-        Compare(a, b);
-        
-        a = a.Select(x => ConvertSingle(x, "water", input)).ToList();
-        b = b.SelectMany(x => ConvertRange(x, "water", input)).ToList();
-        Compare(a, b);
-        
-        a = a.Select(x => ConvertSingle(x, "soil", input)).ToList();
-        b = b.SelectMany(x => ConvertRange(x, "soil", input)).ToList();
-        Compare(a, b);
-        
-        a = a.Select(x => ConvertSingle(x, "temperature", input)).ToList();
-        b = b.SelectMany(x => ConvertRange(x, "temperature", input)).ToList();
-        Compare(a, b);
-        
-        a = a.Select(x => ConvertSingle(x, "humidity", input)).ToList();
-        b = b.SelectMany(x => ConvertRange(x, "humidity", input)).ToList();
-        Compare(a, b);
-
-        return "ok";
-            
-        
         var c = input.Seeds.Chunk(2)
             .Select(x => new SeedRange(x[0], x[1]))
-            .WriteLine("start")
-            .WriteLine("seed-to-soil")
+            //.WriteLine("start")
+            .SelectMany(x => ConvertRange(x, "seed", input))
+            //.WriteLine("seed-to-soil")
             .SelectMany(x => ConvertRange(x, "soil", input))
-            .WriteLine("soil-to-fertilizer")
+            //.WriteLine("soil-to-fertilizer")
             .SelectMany(x => ConvertRange(x, "fertilizer", input))
-            .WriteLine("fertilizer-to-water")
+            //.WriteLine("fertilizer-to-water")
             .SelectMany(x => ConvertRange(x, "water", input))
-            .WriteLine("water-to-light")
+            //.WriteLine("water-to-light")
             .SelectMany(x => ConvertRange(x, "light", input))
-            .WriteLine("light-to-temperature")
+            //.WriteLine("light-to-temperature")
             .SelectMany(x => ConvertRange(x, "temperature", input))
-            .WriteLine("temperature-to-humidity")
+            //.WriteLine("temperature-to-humidity")
             .SelectMany(x => ConvertRange(x, "humidity", input))
-            .WriteLine("humidity-to-location")
+            //.WriteLine("humidity-to-location")
             .ToList();
         return c.Select(x => x.From).Min().ToString();
     }
@@ -205,7 +194,7 @@ public class Day05 : IPuzzle<Day05.Almanac>
             if (range.SourceRangeStart <= item)
             {
                 var diff = item - range.SourceRangeStart;
-                if (diff <= range.RangeLength)
+                if (diff < range.RangeLength)
                 {
                     return range.DestinationRangeStart + diff;
                 }
@@ -216,7 +205,29 @@ public class Day05 : IPuzzle<Day05.Almanac>
     }
 
     public record SeedRange(long From, long Length);
-    
+
+    private static IEnumerable<SeedRange> ConvertAndCompareMethodsRange(SeedRange range, string from, Almanac almanac)
+    {
+        var internalResult = ConvertRange(range, from, almanac).ToList();
+        var naiveResult = Enumerable.Range((int) range.From, (int) range.Length)
+            .Select(x => ConvertSingle(x, from, almanac)).ToList();
+
+        var internalResultSeperated = internalResult.SelectMany(x => Enumerable.Range((int)x.From, (int)x.Length))
+            .Select(x => (long)x);
+
+        if (!naiveResult.SequenceEqual(internalResultSeperated))
+        {
+            Console.WriteLine($"Uh uh. {from}-to-");
+            Console.WriteLine($" Expected:");
+            Console.WriteLine("  " + string.Join(" ", naiveResult));
+            Console.WriteLine("Received:");
+            Console.WriteLine("  " + string.Join(" ", internalResultSeperated));
+        }
+
+        return internalResult;
+    }
+
+
     private static IEnumerable<SeedRange> ConvertRange(SeedRange range, string from, Almanac almanac)
     {
         var map = almanac.MapsBySource[from];
@@ -236,7 +247,7 @@ public class Day05 : IPuzzle<Day05.Almanac>
 
                 var itemsUntilNextMapRange = nextMapRange.SourceRangeStart - range.From;
 
-                if (itemsUntilNextMapRange >= range.Length)
+                if (range.Length <= itemsUntilNextMapRange)
                 {
                     yield return range;
                     yield break;
@@ -249,44 +260,33 @@ public class Day05 : IPuzzle<Day05.Almanac>
             }
             else
             {
-                if (currentMapRange.RangeLength >= range.Length)
+                var amountCanStillFit = (currentMapRange.SourceRangeStart + currentMapRange.RangeLength) - range.From;
+
+                if (amountCanStillFit >= range.Length)
                 {
                     yield return range with
                     {
-                        From = range.From + 
+                        From = range.From +
                             (currentMapRange.DestinationRangeStart - currentMapRange.SourceRangeStart),
                     };
                     yield break;
                 }
 
-                var countThatFitsInRange = (currentMapRange.SourceRangeStart + currentMapRange.RangeLength) - range.From;
-                Debug.Assert(countThatFitsInRange > 0);
-                (var rangeUntil, range) = ChopRange(range, countThatFitsInRange);
+                (var rangeUntil, range) = ChopRange(range, amountCanStillFit);
                 yield return rangeUntil with
                 {
-                    From = rangeUntil.From + 
+                    From = rangeUntil.From +
                         (currentMapRange.DestinationRangeStart - currentMapRange.SourceRangeStart),
                 };
+                currentMapRange = GetRangeWhichStartIsIn(range, map);
 
-                var nextRange = GetNextRange(range, map);
-                if (nextRange is null)
-                {
-                    yield return range with
-                    {
-                        From = range.From +
-                        (currentMapRange.DestinationRangeStart - currentMapRange.SourceRangeStart),
-                    };
-                    yield break;
-                }
-
-                currentMapRange = nextRange;
                 continue;
             }
         }
     }
 
     // Input: [5, len: 20] 10
-    // Output: (5: len 10, 16: len 9)
+    // Output: (5: len 10, 15: len 10)
     private static (SeedRange Left, SeedRange Right) ChopRange(SeedRange range, long leftLength)
     {
         var result = (Left: range, Right: range);
@@ -294,8 +294,8 @@ public class Day05 : IPuzzle<Day05.Almanac>
         {
             Length = leftLength,
         };
-        result.Right = new SeedRange(range.From + leftLength + 1,
-            range.Length - leftLength - 1);
+        result.Right = new SeedRange(range.From + leftLength,
+            range.Length - leftLength);
         
         return result;
     }
@@ -305,7 +305,7 @@ public class Day05 : IPuzzle<Day05.Almanac>
         return map.Ranges
             .FirstOrDefault(x => 
                 x.SourceRangeStart <= range.From &&
-                x.SourceRangeStart + x.RangeLength >= range.From);
+                x.SourceRangeStart + x.RangeLength > range.From);
     }
     
     private static MapRange? GetNextRange(SeedRange range, Map map)
