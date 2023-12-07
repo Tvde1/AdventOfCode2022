@@ -232,7 +232,7 @@ public class Day05 : IPuzzle<Day05.Almanac>
     {
         var map = almanac.MapsBySource[from];
         
-        var currentMapRange = GetRangeWhichStartIsIn(range, map);
+        var currentMapRange = GetRangeWhichCurrentIndexStartsIn(range, map);
         while (true)
         {
             if (currentMapRange is null)
@@ -278,7 +278,7 @@ public class Day05 : IPuzzle<Day05.Almanac>
                     From = rangeUntil.From +
                         (currentMapRange.DestinationRangeStart - currentMapRange.SourceRangeStart),
                 };
-                currentMapRange = GetRangeWhichStartIsIn(range, map);
+                currentMapRange = GetRangeWhichCurrentIndexStartsIn(range, map);
 
                 continue;
             }
@@ -300,7 +300,7 @@ public class Day05 : IPuzzle<Day05.Almanac>
         return result;
     }
 
-    private static MapRange? GetRangeWhichStartIsIn(SeedRange range, Map map)
+    private static MapRange? GetRangeWhichCurrentIndexStartsIn(SeedRange range, Map map)
     {
         return map.Ranges
             .FirstOrDefault(x => 
