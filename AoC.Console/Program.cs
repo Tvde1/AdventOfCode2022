@@ -115,10 +115,20 @@ class AoCConsole
 
             grid.AddRow(res1Panel, res2Panel);
             grid.AddRow(new Markup($"Took {result.ElapsedMsPart1}ms.").Alignment(Justify.Center), new Markup($"Took {result.ElapsedMsPart2}ms.").Alignment(Justify.Center));
-
+            
             var statsPanel = new Panel(grid).Header($"{result.Puzzle.Year} Day {result.Puzzle.Day:D2}");
 
             _console.Write(statsPanel);
+
+            if (result.Part1Exception is not null)
+            {
+                _console.WriteException(result.Part1Exception);
+            }
+            
+            if (result.Part2Exception is not null)
+            {
+                _console.WriteException(result.Part2Exception);
+            }
         }
     }
 

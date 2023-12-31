@@ -39,7 +39,7 @@ public class Day04 : IPuzzle<(int From, int To)>
         }
 
         var count = 0;
-        var l = Parallel.For(input.From, input.To, (n) =>
+        Parallel.For(input.From, input.To, (n) =>
         {
             if (TestNumber(n))
             {
@@ -80,7 +80,7 @@ public class Day04 : IPuzzle<(int From, int To)>
         }
 
         var count = 0;
-        var l = Parallel.For(input.From, input.To, n =>
+        Parallel.For(input.From, input.To, n =>
         {
             if (TestNumber(n))
             {

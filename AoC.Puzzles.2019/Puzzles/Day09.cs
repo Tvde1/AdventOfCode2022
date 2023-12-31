@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using AoC.Common.Attributes;
+﻿using AoC.Common.Attributes;
 using AoC.Common.Interfaces;
 using AoC.Puzzles._2019.Shared;
 

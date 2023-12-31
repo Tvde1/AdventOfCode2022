@@ -48,7 +48,7 @@ namespace AoC.SourceGenerators
         private static (ClassDeclarationSyntax PuzzleClass, int Year, int Day) ExtractPuzzle(
             GeneratorSyntaxContext context, CancellationToken cancellationToken)
         {
-            var classDec = context.Node as ClassDeclarationSyntax;
+            var classDec = (ClassDeclarationSyntax) context.Node;
 
             var attr = classDec.AttributeLists.SelectMany(static y => y.Attributes).First(z => z.Name.ToString() == "Puzzle");
 

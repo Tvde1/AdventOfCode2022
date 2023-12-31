@@ -161,18 +161,11 @@ public enum Tile
     Ball = 4,
 }
 
-public class Arcade
+public class Arcade(long[] memory, int screenWidth, int screenHeight)
 {
-    private readonly Computer _computer;
+    private readonly Computer _computer = new Computer(memory);
 
-    private readonly Tile[,] canvas;
-
-
-    public Arcade(long[] memory, int screenWidth, int screenHeight)
-    {
-        _computer = new Computer(memory);
-        canvas = new Tile[screenWidth, screenHeight];
-    }
+    private readonly Tile[,] _canvas = new Tile[screenWidth, screenHeight];
 
     public (Tile[,] Screen, long? Score, bool HasExited) PlayStep(long? input)
     {
@@ -197,11 +190,11 @@ public class Arcade
             }
             else
             {
-                canvas[instruction.X, instruction.Y] = (Tile)instruction.Instruction;
+                _canvas[instruction.X, instruction.Y] = (Tile)instruction.Instruction;
             }
         }
 
-        return (canvas, score);
+        return (_canvas, score);
     }
 }
 

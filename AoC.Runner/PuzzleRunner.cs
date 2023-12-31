@@ -13,7 +13,7 @@ public class PuzzleRunner : IPuzzleRunner
     private readonly MethodInfo _runMethod;
     private readonly MethodInfo _benchmarkMethod;
 
-    private static readonly Assembly[] assemblies =
+    private static readonly Assembly[] Assemblies =
     {
         Assembly.GetAssembly(typeof(Puzzles._2019.Puzzles.Day01))!,
         Assembly.GetAssembly(typeof(Puzzles._2022.Puzzles.Day01))!,
@@ -66,25 +66,49 @@ public class PuzzleRunner : IPuzzleRunner
         var parsed2 = puzzle.Parse(rawInput);
 
         var sw = Stopwatch.StartNew();
-        var part1 = puzzle.Part1(parsed);
-        sw.Stop();
+        string part1 = "Errored";
+        Exception? part1Exception = null;
+        try
+        {
+            part1 = puzzle.Part1(parsed);
+        }
+        catch (Exception e)
+        {
+            part1Exception = e;
+        }
+        finally
+        {
+            sw.Stop();
+        }
 
         var elapsedPart1 = sw.ElapsedMilliseconds;
 
         sw.Restart();
-        var part2 = puzzle.Part2(parsed2);
-        sw.Stop();
+        string part2 = "Errored";
+        Exception? part2Exception = null;
+        try
+        {
+            part2 = puzzle.Part2(parsed2);
+        }
+        catch (Exception e)
+        {
+            part2Exception = e;
+        }
+        finally
+        {
+            sw.Stop();
+        }
         var elapsedPart2 = sw.ElapsedMilliseconds;
 
-        return new PuzzleResult(puzzleInfo, part1, part2, elapsedPart1, elapsedPart2);
+        return new PuzzleResult(puzzleInfo, part1, part2, elapsedPart1, elapsedPart2, part1Exception, part2Exception);
     }
 
     private static Dictionary<(int Year, int Day), Type> GetPuzzleInputProviders()
     {
-        var c = assemblies
+        var c = Assemblies
             .SelectMany(
-                assembly => assembly!.GetTypes(),
-                (assembly, type) => new
+                assembly => assembly.GetTypes(),
+                (_, type) => new
                 {
                     Type = type,
                     PuzzleAttribute = type.GetCustomAttribute<PuzzleInputAttribute>(),
@@ -100,10 +124,10 @@ public class PuzzleRunner : IPuzzleRunner
     {
         var puzzleInputProviders = GetPuzzleInputProviders();
 
-        var c = assemblies
+        var c = Assemblies
             .SelectMany(
-                assembly => assembly!.GetTypes(),
-                (assembly, type) => new
+                assembly => assembly.GetTypes(),
+                (_, type) => new
                 {
                     Type = type,
                     PuzzleAttribute = type.GetCustomAttribute<PuzzleAttribute>(),

@@ -1,6 +1,5 @@
 ﻿using AoC.Common.Attributes;
 using AoC.Common.Interfaces;
-using AoC.Puzzles._2019.Shared;
 
 namespace AoC.Puzzles._2019.Puzzles;
 

@@ -24,18 +24,18 @@ public class PuzzleBenchmarkRunner<TPuzzle, TParsed, TPuzzleInputProvider>
     [Benchmark, BenchmarkCategory("Parse")]
     public TParsed Parse()
     {
-        return _puzzle!.Parse(_rawInput!);
+        return _puzzle.Parse(_rawInput);
     }
 
     [Benchmark, BenchmarkCategory("Part1")]
     public string Part1()
     {
-        return _puzzle!.Part1(_parsed!);
+        return _puzzle.Part1(_parsed!);
     }
 
     [Benchmark, BenchmarkCategory("Part2")]
     public string Part2()
     {
-        return _puzzle!.Part2(_parsed!);
+        return _puzzle.Part2(_parsed!);
     }
 }
